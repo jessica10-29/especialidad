@@ -18,7 +18,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $direccion = limpiar_dato($_POST['direccion']);
     $ciudad = limpiar_dato($_POST['ciudad']);
     $departamento = limpiar_dato($_POST['departamento']);
-    $correo_inst = limpiar_dato($_POST['correo_institucional']);
+    $correo_inst = limpiar_dato($_POST['correo']);
     $programa = limpiar_dato($_POST['programa_academico']);
     $semestre = limpiar_dato($_POST['semestre']);
     $codigo_est = ($rol == 'estudiante') ? limpiar_dato($_POST['codigo_estudiantil']) : ($u['codigo_estudiantil'] ?? '');
@@ -45,7 +45,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $nuevo_pass = $_POST['password'];
 
     // Update basic info
-    $stmt = $conn->prepare("UPDATE usuarios SET identificacion = ?, telefono = ?, direccion = ?, ciudad = ?, departamento = ?, correo_institucional = ?, programa_academico = ?, semestre = ?, codigo_estudiantil = ?, foto = ? WHERE id = ?");
+    $stmt = $conn->prepare("UPDATE usuarios SET identificacion = ?, telefono = ?, direccion = ?, ciudad = ?, departamento = ?, correo = ?, programa_academico = ?, semestre = ?, codigo_estudiantil = ?, foto = ? WHERE id = ?");
     $stmt->bind_param("ssssssssssi", $identificacion, $telefono, $direccion, $ciudad, $departamento, $correo_inst, $programa, $semestre, $codigo_est, $fotoNombre, $id);
 
     if ($stmt->execute()) {
@@ -212,7 +212,7 @@ if ($rol == 'profesor' && (empty($u['codigo_profesor']) || $u['codigo_profesor']
                         </div>
 
                         <div class="input-group">
-                            <label class="input-label">Correo Institucional</label>
+                            <label class="input-label">Correo</label>
                             <input type="email" name="correo_institucional" value="<?php echo htmlspecialchars($u['correo_institucional'] ?? ''); ?>" class="input-field" placeholder="No especificado">
                         </div>
 
