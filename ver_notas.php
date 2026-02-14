@@ -35,6 +35,18 @@ if (!$modo_lista) {
     if ($mat_info) {
         $materia_id = $mat_info['id'];
 
+        // Datos del profesor para mostrar foto en la vista de estudiante
+        $profesor_nombre = '';
+        $profesor_foto = '';
+        if (!empty($mat_info['profesor_id'])) {
+            $prof_id = (int)$mat_info['profesor_id'];
+            $res_prof = $conn->query("SELECT nombre, foto FROM usuarios WHERE id = $prof_id");
+            if ($res_prof && $prof_row = $res_prof->fetch_assoc()) {
+                $profesor_nombre = $prof_row['nombre'];
+                $profesor_foto = obtener_foto_usuario($prof_row['foto']);
+            }
+        }
+
         // Obtener la matricula_id para la materia y el estudiante
         $stmt_matricula = $conn->prepare("SELECT id FROM matriculas WHERE estudiante_id = ? AND materia_id = ?");
         $stmt_matricula->bind_param("ii", $estudiante_id, $materia_id);
