@@ -1,0 +1,29 @@
+# Seguridad y forzado de HTTPS (omite localhost con o sin puerto)
+RewriteEngine On
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
+RewriteCond %{HTTPS} !=on
+RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
+
+# Marcar entorno local para cabeceras condicionales
+SetEnvIf Host "^(localhost|127\\.0\\.0\\.1)(:\\d+)?$" IS_LOCAL=1
+
+# Cabeceras de seguridad básicas
+<IfModule mod_headers.c>
+  Header always set Strict-Transport-Security "max-age=31536000; includeSubDomains" "expr=%{HTTPS} == 'on' && %{ENV:IS_LOCAL} != '1'"
+  Header always set X-Content-Type-Options "nosniff"
+  Header always set X-Frame-Options "SAMEORIGIN"
+  Header always set Referrer-Policy "strict-origin-when-cross-origin"
+  Header always set Permissions-Policy "geolocation=(), microphone=(), camera=()"
+  # CSP estricta en producción, más permisiva en localhost (sin upgrade a HTTPS)
+  Header always set Content-Security-Policy "default-src 'self' data:; img-src 'self' data: https:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self'; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none'; upgrade-insecure-requests; block-all-mixed-content;" "expr=%{ENV:IS_LOCAL} != '1'"
+  Header always set Content-Security-Policy "default-src 'self' data:; img-src 'self' data: https: http:; style-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; script-src 'self' 'unsafe-inline' https://cdnjs.cloudflare.com; font-src 'self' data: https://cdnjs.cloudflare.com; connect-src 'self' http: https:; form-action 'self'; base-uri 'self'; frame-ancestors 'self'; object-src 'none';" "expr=%{ENV:IS_LOCAL} == '1'"
+</IfModule>
+
+# Evitar exposición de archivos sensibles / de prueba
+Options -Indexes
+<FilesMatch "(?i)^(test_|debug_|probador_completo|temp_diag|fix_db).+\.php$">
+  Require all denied
+</FilesMatch>
+<FilesMatch "(?i)\.(sql|zip|rar|7z|bak)$">
+  Require all denied
+</FilesMatch>

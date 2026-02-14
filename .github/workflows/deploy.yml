@@ -1,0 +1,81 @@
+
+name: Deploy to InfinityFree
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Build secure/config.php from secrets
+        run: |
+          mkdir -p secure
+          cat > secure/config.php <<PHP
+          <?php
+          // Archivo generado en deploy; contiene las credenciales directamente.
+          return [
+              'DB_HOST' => '${DB_HOST}',
+              'DB_USER' => '${DB_USER}',
+              'DB_PASS' => '${DB_PASS}',
+              'DB_NAME' => '${DB_NAME}',
+          ];
+          PHP
+        env:
+          DB_HOST: ${{ secrets.DB_HOST }}
+          DB_USER: ${{ secrets.DB_USER }}
+          DB_PASS: ${{ secrets.DB_PASS }}
+          DB_NAME: ${{ secrets.DB_NAME }}
+
+      - name: Build secure/mail.php from secrets
+        run: |
+          mkdir -p secure
+          cat > secure/mail.php <<PHP
+          <?php
+          // Generado en deploy: credenciales SMTP incrustadas
+          return [
+              'SMTP_HOST' => '${SMTP_HOST}',
+              'SMTP_PORT' => '${SMTP_PORT}',
+              'SMTP_SECURE' => '${SMTP_SECURE}',
+              'SMTP_USER' => '${SMTP_USER}',
+              'SMTP_PASS' => '${SMTP_PASS}',
+              'FROM_EMAIL' => '${FROM_EMAIL}',
+              'FROM_NAME'  => '${FROM_NAME}',
+              'SMTP_DEBUG' => 0,
+              'TIMEOUT'    => 30,
+          ];
+          PHP
+        env:
+          SMTP_HOST: ${{ secrets.SMTP_HOST }}
+          SMTP_PORT: ${{ secrets.SMTP_PORT }}
+          SMTP_SECURE: ${{ secrets.SMTP_SECURE }}
+          SMTP_USER: ${{ secrets.SMTP_USER }}
+          SMTP_PASS: ${{ secrets.SMTP_PASS }}
+          FROM_EMAIL: ${{ secrets.FROM_EMAIL }}
+          FROM_NAME: ${{ secrets.FROM_NAME }}
+
+      - name: Add secure/.htaccess
+        run: |
+          mkdir -p secure
+          echo "Deny from all" > secure/.htaccess
+
+      - name: FTP Deploy
+        uses: SamKirkland/FTP-Deploy-Action@v4.3.5
+        with:
+          server: ${{ secrets.FTP_SERVER }}
+          username: ${{ secrets.FTP_USERNAME }}
+          password: ${{ secrets.FTP_PASSWORD }}
+          server-dir: htdocs/
+          dangerous-clean-slate: true
+          timeout: 86400000
+          log-level: standard
+          exclude: |
+            .git*
+            .github/**
+            logs/**
