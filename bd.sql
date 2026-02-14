@@ -132,3 +132,4 @@ CREATE TABLE IF NOT EXISTS password_resets (
     -- pero sí se recomienda indexar el email para búsquedas rápidas.
     , INDEX (email)
 );
+
