@@ -121,7 +121,28 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
                 </div>
             </header>
 
-            <div class="responsive-flex-column" style="display:flex; flex-wrap: wrap; gap: 16px; align-items: stretch; justify-content: center; margin-bottom: 10px;">
+            <div class="responsive-flex-column" style="display:flex; flex-wrap: wrap; gap: 16px; align-items: stretch; justify-content: center; margin-bottom: 25px;">
+                <?php 
+                $habil_global = es_periodo_habil();
+                $p_res = $conn->query("SELECT nombre, limite_notas FROM periodos WHERE id = $p_actual_id");
+                $p_info = $p_res->fetch_assoc();
+                ?>
+                <div class="card glass-panel fade-in" style="flex: 1 1 300px; background: <?php echo $habil_global ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)'; ?>; border: 1px solid <?php echo $habil_global ? '#10b981' : '#f43f5e'; ?>; padding: 20px; display: flex; align-items: center; gap: 20px;">
+                    <div style="font-size: 2.5rem; color: <?php echo $habil_global ? '#10b981' : '#f43f5e'; ?>;">
+                        <i class="fa-solid <?php echo $habil_global ? 'fa-door-open' : 'fa-door-closed'; ?>"></i>
+                    </div>
+                    <div>
+                        <h4 style="margin: 0; color: white;">Estado Académico: <?php echo htmlspecialchars($p_info['nombre']); ?></h4>
+                        <p style="margin: 5px 0; font-size: 0.9rem; color: rgba(255,255,255,0.7);">
+                            <?php if ($habil_global): ?>
+                                El portal está <strong>Abierto</strong>. Fecha límite de trabajos: <?php echo date('d M, Y', strtotime($p_info['limite_notas'])); ?>
+                            <?php else: ?>
+                                El portal está <strong>Cerrado</strong>. El periodo de gestión ha finalizado.
+                            <?php endif; ?>
+                        </p>
+                    </div>
+                </div>
+
                 <div class="card glass-panel fade-in responsive-banner-card" style="flex:1 1 420px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.22) 0%, rgba(180, 83, 9, 0.12) 100%); border: 3px solid #fbbf24; padding: 20px; position: relative; overflow: hidden; box-shadow: 0 0 35px rgba(251, 191, 36, 0.22); border-radius: 16px;">
                     <div class="responsive-hidden-icon" style="position: absolute; top: -30px; right: -30px; font-size: 15rem; color: rgba(251, 191, 36, 0.1); transform: rotate(15deg); pointer-events: none;">
                         <i class="fa-solid fa-scroll"></i>

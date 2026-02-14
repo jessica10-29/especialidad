@@ -27,6 +27,15 @@ if (!$useSandbox && !$skipLocalDetection) {
     }
 }
 
+// 🛡️ RECONOCIMIENTO DE CUENTA GOOGLE (Fix)
+// Si el usuario proporcionó credenciales de Gmail reales en el bloque 'prod',
+// priorizamos 'prod' aunque estemos en localhost, para que su cuenta sea "reconocida".
+$gmail_personalizado = 'juanpabloortizcastro1@gmail.com'; 
+$prod_user = getenv('SMTP_USER') ?: $gmail_personalizado;
+if ($useSandbox && stripos($prod_user, '@gmail.com') !== false && $prod_user !== 'tu_correo@gmail.com') {
+    $useSandbox = false; 
+}
+
 $prod = [
     'SMTP_HOST'   => getenv('SMTP_HOST')   ?: 'smtp.gmail.com',
     'SMTP_PORT'   => getenv('SMTP_PORT')   ?: 587,

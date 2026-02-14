@@ -148,6 +148,9 @@ $estudiantes = $conn->query("
                 <a href="gestion_notas.php" class="nav-link">
                     <i class="fa-solid fa-user-pen"></i> Gestionar Notas
                 </a>
+                <a href="gestion_actividades.php" class="nav-link">
+                    <i class="fa-solid fa-tasks"></i> Gestión de Trabajos
+                </a>
                 <a href="asistencia.php" class="nav-link">
                     <i class="fa-solid fa-clipboard-user"></i> Asistencia
                 </a>
