@@ -121,7 +121,7 @@ $estudiantes = $conn->query("
         <aside class="sidebar">
             <div class="logo-area" style="margin-bottom: 40px; text-align: center;">
                 <i class="fa-solid fa-graduation-cap logo-icon" style="font-size: 2rem; color: var(--primary);"></i>
-                <h3 style="color: white; margin-top: 10px;">Unicali<span style="color: var(--primary);">Docente</span></h3>
+                <h3 style="color: white; margin-top: 10px;">Unicali Segura<span style="color: var(--primary);">Docente</span></h3>
             </div>
 
             <nav>

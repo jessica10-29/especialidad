@@ -1,4 +1,4 @@
-<?php
+﻿<?php
 // conexion.php - Conexion a Base de Datos y funciones globales
 
 // Forzar UTF-8 en todas las respuestas
@@ -88,8 +88,8 @@ if ($conn->connect_errno) {
     http_response_code(503);
     // Respuesta limpia y sin "pantallazo rojo"
     $mensaje = $isLocal
-        ? 'No se pudo conectar a la base de datos local. Verifica MySQL, usuario, contraseña y nombre de BD.'
-        : 'Estamos realizando ajustes técnicos. Intenta nuevamente en unos minutos.';
+        ? 'No se pudo conectar a la base de datos local. Verifica MySQL, usuario, contraseÃ±a y nombre de BD.'
+        : 'Estamos realizando ajustes tÃ©cnicos. Intenta nuevamente en unos minutos.';
 
     echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">';
     echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
@@ -186,3 +186,5 @@ function verificar_csrf_token($token)
     }
     return hash_equals($_SESSION['csrf_token'], $token);
 }
+
+
