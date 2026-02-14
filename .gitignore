@@ -1,0 +1,26 @@
+﻿# Credenciales y datos sensibles
+secure/config.php
+secure/*.json
+secure/*.env
+*.env
+*.env.local
+
+# Logs y temporales
+logs/
+*.log
+*.tmp
+*.swp
+
+# Subidas de usuarios
+uploads/
+
+# Dependencias comunes
+node_modules/
+vendor/
+
+# Backups y binarios
+*.bak
+*.zip
+*.tar
+*.tar.gz
+

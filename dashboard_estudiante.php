@@ -102,8 +102,8 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
         </aside>
 
         <main class="main-content">
-            <!-- ðŸ† SECCIÓN DE CERTIFICADOS SUPREMA (IMPULSADA) -->
-            <!-- ðŸ† SECCIÓN DE CERTIFICADOS SUPREMA (IMPULSADA) -->
+            <!-- SECCIÓN DE CERTIFICADOS SUPREMA (IMPULSADA) -->
+            <!-- SECCIÓN DE CERTIFICADOS SUPREMA (IMPULSADA) -->
             <div class="card glass-panel fade-in responsive-banner-card" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.25) 0%, rgba(180, 83, 9, 0.15) 100%); border: 4px solid #fbbf24; margin-bottom: 40px; padding: 40px; position: relative; overflow: hidden; box-shadow: 0 0 60px rgba(251, 191, 36, 0.3);">
                 <div class="responsive-hidden-icon" style="position: absolute; top: -30px; right: -30px; font-size: 15rem; color: rgba(251, 191, 36, 0.1); transform: rotate(15deg); pointer-events: none;">
                     <i class="fa-solid fa-scroll"></i>
@@ -130,7 +130,7 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
                     <div style="display:flex; align-items:center; gap:12px;">
                         <div style="width:96px; height:96px; border-radius:50%; background: url('<?php echo htmlspecialchars($foto_estudiante); ?>') center/cover; border:2px solid var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,0.2);"></div>
                         <div>
-                            <h1 class="text-gradient responsive-text-xl" style="font-size: 2.2rem;">Hola, <?php echo explode(' ', htmlspecialchars($nombre_estudiante))[0]; ?> ðŸ‘‹</h1>
+                            <h1 class="text-gradient responsive-text-xl" style="font-size: 2.2rem;">Hola, <?php echo explode(' ', htmlspecialchars($nombre_estudiante))[0]; ?></h1>
                             <p class="text-muted">Estado actual de tu formación académica en Unicali.</p>
                         </div>
                     </div>
@@ -250,7 +250,7 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
                 <div>
                     <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Herramientas</h3>
 
-                    <!-- ðŸ‘¤ Tarjeta de Perfil (MOVIDA AL PRINCIPIO) -->
+                    <!-- Tarjeta de Perfil (MOVIDA AL PRINCIPIO) -->
                     <div class="card glass-panel fade-in" style="margin-bottom: 20px; text-align: center; padding: 25px; border: 1px solid rgba(99, 102, 241, 0.2);">
                         <div style="width: 80px; height: 80px; margin: 0 auto 15px; background: url('<?php echo $_SESSION['foto'] ?? 'default_avatar.png'; ?>'); background-size: cover; border-radius: 50%; border: 3px solid var(--primary);"></div>
                         <h4><?php echo htmlspecialchars($nombre_estudiante); ?></h4>
