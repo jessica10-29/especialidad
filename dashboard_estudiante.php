@@ -44,7 +44,7 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Historial Académico - Unicali</title>
+    <title>Historial Académico - Unicali Segura</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">
     <link rel="stylesheet" href="css/estilos.css">
     <link rel="icon" type="image/png" href="favicon.png?v=3">
@@ -104,43 +104,45 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
         <main class="main-content">
             <!-- SECCIÓN DE CERTIFICADOS SUPREMA (IMPULSADA) -->
             <!-- SECCIÓN DE CERTIFICADOS SUPREMA (IMPULSADA) -->
-            <div class="card glass-panel fade-in responsive-banner-card" style="background: linear-gradient(135deg, rgba(251, 191, 36, 0.25) 0%, rgba(180, 83, 9, 0.15) 100%); border: 4px solid #fbbf24; margin-bottom: 40px; padding: 40px; position: relative; overflow: hidden; box-shadow: 0 0 60px rgba(251, 191, 36, 0.3);">
-                <div class="responsive-hidden-icon" style="position: absolute; top: -30px; right: -30px; font-size: 15rem; color: rgba(251, 191, 36, 0.1); transform: rotate(15deg); pointer-events: none;">
-                    <i class="fa-solid fa-scroll"></i>
-                </div>
-                <div class="responsive-flex-column" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 30px; position: relative; z-index: 1;">
-                    <div style="flex: 1; min-width: 300px;">
-                        <span style="background: #fbbf24; color: #1e293b; padding: 6px 20px; border-radius: 50px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">¡NUEVO! Trámite Disponible</span>
-                        <h2 class="responsive-text-lg" style="color: #fbbf24; margin-bottom: 15px; font-size: 2.5rem; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">Certificado de Estudio</h2>
-                        <p class="responsive-text-md" style="color: white; font-size: 1.2rem; line-height: 1.6; opacity: 1; font-weight: 500;">
-                            Descarga tu certificación oficial de matrícula con código QR y firma digital.
-                        </p>
-                    </div>
-                    <div class="responsive-btn-container" style="text-align: center;">
-                        <a href="generar_documento.php?tipo=estudio" target="_blank" class="btn" style="background: #fbbf24; color: #1e293b; padding: 25px 50px; font-size: 1.4rem; font-weight: 950; border-radius: 20px; box-shadow: 0 20px 40px rgba(251, 191, 36, 0.5); text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: none; display: flex; align-items: center; gap: 15px; cursor: pointer;">
-                            <i class="fa-solid fa-file-pdf" style="font-size: 2rem;"></i> GENERAR CERTIFICADO
-                        </a>
-                        <p style="margin-top: 15px; font-size: 0.9rem; color: #fbbf24; font-weight: 800; text-transform: uppercase; letter-spacing: 1px;">Documento PDF Válido</p>
-                    </div>
-                </div>
-            </div>
-
-            <header style="margin-bottom: 35px;">
+            <header style="margin-bottom: 30px;">
                 <div class="responsive-header" style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px;">
-                    <div style="display:flex; align-items:center; gap:12px;">
-                        <div style="width:96px; height:96px; border-radius:50%; background: url('<?php echo htmlspecialchars($foto_estudiante); ?>') center/cover; border:2px solid var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,0.2);"></div>
-                        <div>
-                            <h1 class="text-gradient responsive-text-xl" style="font-size: 2.2rem;">Hola, <?php echo explode(' ', htmlspecialchars($nombre_estudiante))[0]; ?></h1>
-                            <p class="text-muted">Estado actual de tu formación académica en Unicali.</p>
-                        </div>
+                    <div>
+                        <h1 class="text-gradient responsive-text-xl" style="font-size: 2.2rem;">Hola, <?php echo htmlspecialchars($nombre_estudiante); ?></h1>
+                        <p class="text-muted">Estado actual de tu formación académica en Unicali Segura.</p>
                     </div>
-                    <div class="responsive-btn-header" style="display: flex; gap: 10px; align-items:center;">
-                        <a href="pdf.php" target="_blank" class="btn btn-outline" style="background: rgba(255,255,255,0.05);">
-                            <i class="fa-solid fa-file-pdf"></i> Reporte de Notas
+                    <div class="responsive-btn-header" style="display: flex; flex-direction: column; align-items: center; gap: 10px;">
+                        <div style="width: 110px; height: 110px; border-radius: 50%; border: 4px solid rgba(255,255,255,0.22); box-shadow: 0 12px 28px rgba(0,0,0,0.35); overflow: hidden; background: radial-gradient(circle at 30% 30%, rgba(255,255,255,0.25), rgba(255,255,255,0.05)); display: flex; align-items: center; justify-content: center;">
+                            <img src="<?php echo htmlspecialchars($foto_estudiante); ?>" alt="Foto de perfil" style="width: 100%; height: 100%; object-fit: cover;">
+                        </div>
+                        <a href="perfil.php" class="btn btn-primary" style="background: linear-gradient(90deg, var(--primary), #8b5cf6); color: #fff;">
+                            <i class="fa-solid fa-user-pen"></i> Editar Perfil
                         </a>
                     </div>
                 </div>
             </header>
+
+            <div class="responsive-flex-column" style="display:flex; flex-wrap: wrap; gap: 16px; align-items: stretch; justify-content: center; margin-bottom: 10px;">
+                <div class="card glass-panel fade-in responsive-banner-card" style="flex:1 1 420px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.22) 0%, rgba(180, 83, 9, 0.12) 100%); border: 3px solid #fbbf24; padding: 20px; position: relative; overflow: hidden; box-shadow: 0 0 35px rgba(251, 191, 36, 0.22); border-radius: 16px;">
+                    <div class="responsive-hidden-icon" style="position: absolute; top: -30px; right: -30px; font-size: 15rem; color: rgba(251, 191, 36, 0.1); transform: rotate(15deg); pointer-events: none;">
+                        <i class="fa-solid fa-scroll"></i>
+                    </div>
+                    <div class="responsive-flex-column" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: relative; z-index: 1;">
+                        <div style="flex: 1; min-width: 260px;">
+                            <span style="background: #fbbf24; color: #1e293b; padding: 6px 18px; border-radius: 50px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">¡NUEVO! Trámite Disponible</span>
+                            <h2 class="responsive-text-lg" style="color: #fbbf24; margin-bottom: 10px; font-size: 2.1rem; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">Certificado de Estudio</h2>
+                            <p class="responsive-text-md" style="color: white; font-size: 1.05rem; line-height: 1.5; opacity: 1; font-weight: 500;">
+                                Descarga tu certificación oficial de matrícula con código QR y firma digital.
+                            </p>
+                        </div>
+                        <div class="responsive-btn-container" style="text-align: center;">
+                            <a href="generar_documento.php?tipo=estudio" target="_blank" class="btn" style="background: #fbbf24; color: #1e293b; padding: 18px 32px; font-size: 1.1rem; font-weight: 900; border-radius: 16px; box-shadow: 0 16px 32px rgba(251, 191, 36, 0.45); text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: none; display: flex; align-items: center; gap: 12px; cursor: pointer;">
+                                <i class="fa-solid fa-file-pdf" style="font-size: 1.6rem;"></i> Generar
+                            </a>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
 
             <!-- Grid de Estadísticas (Trello: Resumen de promedio) -->
             <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 20px; margin-bottom: 40px;">
@@ -189,7 +191,7 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
 
                 <div>
                     <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-bookmark" style="color: var(--primary);"></i> Mis Materias Inscritas (Progreso)</h3>
-                    <div style="display: grid; grid-template-columns: 1fr; gap: 15px;">
+                    <div style="display: grid; grid-template-columns: 1fr; gap: 12px;">
                         <?php
                         $res_matriculas->data_seek(0);
                         if ($res_matriculas && $res_matriculas->num_rows > 0) {
@@ -207,38 +209,38 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
                                 }
                                 $progreso = ($num_notas / 5) * 100;
 
-                                echo '<div class="card glass-panel fade-in" style="padding: 20px;">';
-                                echo '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 15px;">';
+                                echo '<div class="card glass-panel fade-in" style="padding: 16px 18px; border: 1px solid rgba(255,255,255,0.05); border-radius: 14px; gap: 8px;">';
+                                echo '<div style="display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 10px; gap: 10px;">';
                                 echo '<div>';
-                                echo '<span style="font-size: 0.7rem; font-weight: 700; color: var(--primary); background: rgba(99,102,241,0.1); padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">' . htmlspecialchars($row['codigo']) . '</span>';
-                                echo '<h4 style="margin-top: 5px; font-size: 1.1rem;">' . htmlspecialchars($row['nombre']) . '</h4>';
-                                echo '<p class="text-muted" style="font-size: 0.75rem;">Docente: ' . htmlspecialchars($row['profesor']) . '</p>';
+                                echo '<span style="font-size: 0.78rem; font-weight: 700; color: var(--primary); background: rgba(99,102,241,0.1); padding: 3px 8px; border-radius: 4px; text-transform: uppercase;">' . htmlspecialchars($row['codigo']) . '</span>';
+                                echo '<h4 style="margin-top: 4px; font-size: 1.16rem;">' . htmlspecialchars($row['nombre']) . '</h4>';
+                                echo '<p class="text-muted" style="font-size: 0.84rem; margin:2px 0 0;">Docente: ' . htmlspecialchars($row['profesor']) . '</p>';
                                 echo '</div>';
                                 echo '<div style="text-align: right;">';
-                                echo '<span style="font-size: 1.2rem; font-weight: 800; color: ' . ($row['promedio'] >= 3 ? '#34d399' : '#fb7185') . ';">' . number_format($row['promedio'], 1) . '</span>';
-                                echo '<p style="font-size: 0.6rem; opacity: 0.5; margin-top: -3px;">Nota Actual</p>';
+                                echo '<span style="font-size: 1.24rem; font-weight: 800; color: ' . ($row['promedio'] >= 3 ? '#34d399' : '#fb7185') . ';">' . number_format($row['promedio'], 1) . '</span>';
+                                echo '<p style="font-size: 0.68rem; opacity: 0.55; margin-top: -2px;">Nota</p>';
                                 echo '</div>';
                                 echo '</div>';
 
                                 // Trello: Progreso por materia
-                                echo '<div style="margin-bottom: 10px;">';
-                                echo '<div style="display: flex; justify-content: space-between; font-size: 0.75rem; margin-bottom: 5px;">';
+                                echo '<div style="margin-bottom: 8px;">';
+                                echo '<div style="display: flex; justify-content: space-between; font-size: 0.72rem; margin-bottom: 4px;">';
                                 echo '<span>Avance del Curso</span>';
                                 echo '<span>' . round($progreso) . '%</span>';
                                 echo '</div>';
                                 echo '<div style="height: 6px; background: rgba(255,255,255,0.05); border-radius: 10px; overflow: hidden;">';
-                                echo '<div style="width: ' . $progreso . '%; height: 100%; background: var(--primary); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 10px var(--primary);"></div>';
+                                echo '<div style="width: ' . $progreso . '%; height: 100%; background: var(--primary); transition: width 1s cubic-bezier(0.4, 0, 0.2, 1); box-shadow: 0 0 8px var(--primary);"></div>';
                                 echo '</div>';
                                 echo '</div>';
 
-                                echo '<div style="display: flex; gap: 10px; margin-top: 15px;">';
-                                echo '<a href="ver_notas.php?materia=' . urlencode($row['nombre']) . '" class="btn btn-outline" style="flex: 1; font-size: 0.75rem; padding: 8px;">Ver Detalle</a>';
-                                echo '<a href="pdf.php?materia=' . urlencode($row['nombre']) . '" target="_blank" class="btn btn-outline" style="width: 40px; padding: 0; display: flex; align-items: center; justify-content: center;"><i class="fa-solid fa-file-pdf"></i></a>';
+                                echo '<div style="display: flex; gap: 8px; margin-top: 10px;">';
+                                echo '<a href="ver_notas.php?materia=' . urlencode($row['nombre']) . '" class="btn btn-outline" style="flex: 1; font-size: 0.86rem; padding: 8px 10px;">Ver Detalle</a>';
+                                echo '<a href="pdf.php?materia=' . urlencode($row['nombre']) . '" target="_blank" class="btn btn-outline" style="width: 40px; padding: 0; display: flex; align-items: center; justify-content: center; border-color: rgba(239,68,68,0.4); color: #f87171;"><i class="fa-solid fa-file-pdf"></i></a>';
                                 echo '</div>';
                                 echo '</div>';
                             }
                         } else {
-                            echo '<div class="card glass-panel" style="text-align: center; padding: 40px;">';
+                            echo '<div class="card glass-panel" style="text-align: center; padding: 32px;">';
                             echo '<p class="text-muted">No tienes materias inscritas.</p>';
                             echo '</div>';
                         }
@@ -249,16 +251,6 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
                 <!-- Barra Lateral Derecha: Acciones Rápidas (Trello: Acceso rápido) -->
                 <div>
                     <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-bolt" style="color: #fbbf24;"></i> Herramientas</h3>
-
-                    <!-- Tarjeta de Perfil (MOVIDA AL PRINCIPIO) -->
-                    <div class="card glass-panel fade-in" style="margin-bottom: 20px; text-align: center; padding: 25px; border: 1px solid rgba(99, 102, 241, 0.2);">
-                        <div style="width: 80px; height: 80px; margin: 0 auto 15px; background: url('<?php echo $_SESSION['foto'] ?? 'default_avatar.png'; ?>'); background-size: cover; border-radius: 50%; border: 3px solid var(--primary);"></div>
-                        <h4><?php echo htmlspecialchars($nombre_estudiante); ?></h4>
-                        <p class="text-muted" style="font-size: 0.75rem; color: var(--primary);">Estudiante de Pregrado</p>
-                        <a href="perfil.php" class="btn btn-primary" style="margin-top: 15px; width: 100%; font-size: 0.8rem; height: 40px; justify-content: center; font-weight: 700;">
-                            <i class="fa-solid fa-user-pen" style="margin-right: 8px;"></i> Editar Perfil
-                        </a>
-                    </div>
 
                     <a href="generar_documento.php?tipo=estudio" target="_blank" class="card glass-panel fade-in" style="display: flex; gap: 15px; align-items: center; text-decoration: none; padding: 20px; transition: transform 0.2s; border: 1px solid rgba(251, 191, 36, 0.3);">
                         <div style="background: rgba(251, 191, 36, 0.1); width: 45px; height: 45px; border-radius: 10px; display: flex; align-items: center; justify-content: center;">
