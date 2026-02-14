@@ -154,13 +154,28 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
 
                 <div class="responsive-layout-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
                     <?php if ($materias_disponibles && $materias_disponibles->num_rows > 0): ?>
-                        <?php while ($m = $materias_disponibles->fetch_assoc()): ?>
+                        <?php while ($m = $materias_disponibles->fetch_assoc()): 
+                            $m_id = $m['id'];
+                            $prof_nombre = 'No asignado';
+                            $prof_foto = obtener_foto_usuario(null);
+                            
+                            // Obtener nombre y foto del profesor para este curso
+                            $q_prof = $conn->query("SELECT nombre, foto FROM usuarios WHERE id = (SELECT profesor_id FROM materias WHERE id = $m_id)");
+                            if ($q_prof && $p_row = $q_prof->fetch_assoc()) {
+                                $prof_nombre = $p_row['nombre'];
+                                $prof_foto = obtener_foto_usuario($p_row['foto']);
+                            }
+                        ?>
                             <div class="card glass-panel fade-in" style="padding: 20px;">
                                 <div style="display: flex; justify-content: space-between; align-items: flex-start; gap: 10px;">
                                     <div>
                                         <span style="font-size: 0.75rem; font-weight: 700; color: var(--primary); background: rgba(99,102,241,0.12); padding: 4px 10px; border-radius: 6px; text-transform: uppercase;"><?php echo htmlspecialchars($m['codigo']); ?></span>
                                         <h3 style="margin-top: 8px; margin-bottom: 6px;"><?php echo htmlspecialchars($m['nombre']); ?></h3>
                                         <p class="text-muted" style="font-size: 0.8rem;"><?php echo htmlspecialchars($m['descripcion'] ?? ''); ?></p>
+                                    </div>
+                                    <div style="text-align: right;">
+                                        <div style="width: 40px; height: 40px; border-radius: 50%; background: url('<?php echo htmlspecialchars($prof_foto); ?>') center/cover; border: 2px solid var(--primary); margin-left: auto; margin-bottom: 5px;" title="Docente: <?php echo htmlspecialchars($prof_nombre); ?>"></div>
+                                        <small class="text-muted" style="font-size: 0.7rem; display: block; max-width: 100px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><?php echo htmlspecialchars($prof_nombre); ?></small>
                                     </div>
                                 </div>
                                 <div style="display: flex; gap: 10px; margin-top: 12px;">
