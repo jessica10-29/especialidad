@@ -5,6 +5,7 @@ verificar_rol('estudiante');
 
 $estudiante_id = $_SESSION['usuario_id'];
 $nombre_estudiante = obtener_nombre_usuario();
+$foto_estudiante = obtener_foto_usuario($_SESSION['foto'] ?? null);
 
 // Obtener Periodo Actual de forma segura (Self-Healing)
 $p_actual_id = obtener_periodo_actual();
@@ -112,11 +113,14 @@ $materias_ganando = $res_ganando->fetch_assoc()['count'];
 
             <header style="margin-bottom: 35px;">
                 <div class="responsive-header" style="display: flex; justify-content: space-between; align-items: start; flex-wrap: wrap; gap: 20px;">
-                    <div>
-                        <h1 class="text-gradient responsive-text-xl" style="font-size: 2.2rem;">Hola, <?php echo explode(' ', htmlspecialchars($nombre_estudiante))[0]; ?> 👋</h1>
-                        <p class="text-muted">Estado actual de tu formación académica en Unicali.</p>
+                    <div style="display:flex; align-items:center; gap:12px;">
+                        <div style="width:46px; height:46px; border-radius:50%; background: url('<?php echo htmlspecialchars($foto_estudiante); ?>') center/cover; border:2px solid var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,0.2);"></div>
+                        <div>
+                            <h1 class="text-gradient responsive-text-xl" style="font-size: 2.2rem;">Hola, <?php echo explode(' ', htmlspecialchars($nombre_estudiante))[0]; ?> 👋</h1>
+                            <p class="text-muted">Estado actual de tu formación académica en Unicali.</p>
+                        </div>
                     </div>
-                    <div class="responsive-btn-header" style="display: flex; gap: 10px;">
+                    <div class="responsive-btn-header" style="display: flex; gap: 10px; align-items:center;">
                         <a href="pdf.php" target="_blank" class="btn btn-outline" style="background: rgba(255,255,255,0.05);">
                             <i class="fa-solid fa-file-pdf"></i> Reporte de Notas
                         </a>

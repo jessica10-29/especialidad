@@ -5,6 +5,7 @@ verificar_rol('profesor');
 
 $profesor_id = $_SESSION['usuario_id'];
 $nombre_profesor = obtener_nombre_usuario();
+$foto_profesor = obtener_foto_usuario($_SESSION['foto'] ?? null);
 $mensaje_flash = '';
 $periodo_actual_id = obtener_periodo_actual();
 $tiene_columna_periodo = false;
@@ -154,7 +155,9 @@ $estudiantes = $conn->query("
                     <h1 class="text-gradient">Hola, Profe. <?php echo htmlspecialchars($nombre_profesor); ?></h1>
                     <p class="text-muted">Resumen de tu actividad académica</p>
                 </div>
-                <div class="user-avatar" style="width: 40px; height: 40px; background: var(--primary); border-radius: 50%;"></div>
+                <div style="display:flex; align-items:center; gap:10px;">
+                    <div style="width: 44px; height: 44px; border-radius: 50%; background: url('<?php echo htmlspecialchars($foto_profesor); ?>') center/cover; border: 2px solid var(--primary); box-shadow: 0 0 0 3px rgba(99,102,241,0.15);"></div>
+                </div>
             </header>
             <?php echo $mensaje_flash; ?>
 

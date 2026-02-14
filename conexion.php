@@ -27,15 +27,17 @@ if (!is_dir($logDir)) {
 }
 ini_set('error_log', $logDir . '/php-error.log');
 
-// === Cabeceras de seguridad ===
-header('X-Content-Type-Options: nosniff');
-header('X-Frame-Options: SAMEORIGIN');
-header('X-XSS-Protection: 1; mode=block');
-header('Referrer-Policy: strict-origin-when-cross-origin');
-header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
+// === Cabeceras de seguridad === (solo si no hay salida previa)
+if (!headers_sent()) {
+    header('X-Content-Type-Options: nosniff');
+    header('X-Frame-Options: SAMEORIGIN');
+    header('X-XSS-Protection: 1; mode=block');
+    header('Referrer-Policy: strict-origin-when-cross-origin');
+    header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
+}
 
 // Forzar HTTPS solo si hay certificado activo o se habilita por variable de entorno
-if (!$isLocal && ($httpsActivo || $forzarHttps)) {
+if (!$isLocal && ($httpsActivo || $forzarHttps) && !headers_sent()) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
     if (!$httpsActivo) {
         header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
@@ -45,14 +47,16 @@ if (!$isLocal && ($httpsActivo || $forzarHttps)) {
 
 // Cookies de sesion seguras
 $cookieParams = session_get_cookie_params();
-session_set_cookie_params([
-    'lifetime' => $cookieParams['lifetime'],
-    'path' => $cookieParams['path'],
-    'domain' => $cookieParams['domain'],
-    'secure' => $httpsActivo,
-    'httponly' => true,
-    'samesite' => 'Strict'
-]);
+if (!headers_sent()) {
+    session_set_cookie_params([
+        'lifetime' => $cookieParams['lifetime'],
+        'path' => $cookieParams['path'],
+        'domain' => $cookieParams['domain'],
+        'secure' => $httpsActivo,
+        'httponly' => true,
+        'samesite' => 'Strict'
+    ]);
+}
 
 // Cargar credenciales externas
 $configPath = __DIR__ . '/secure/config.php';

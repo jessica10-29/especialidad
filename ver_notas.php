@@ -142,6 +142,15 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
                         <p class="text-muted">Selecciona una materia para ver tus notas detalladas.</p>
                     </div>
                 </header>
+                <?php if (!empty($profesor_nombre)): ?>
+                <div style="display:flex; align-items:center; gap:12px; margin-bottom: 20px;">
+                    <div style="width:46px; height:46px; border-radius:50%; background: url('<?php echo htmlspecialchars($profesor_foto); ?>') center/cover; border:2px solid var(--primary); box-shadow:0 0 0 3px rgba(99,102,241,0.15);"></div>
+                    <div>
+                        <strong><?php echo htmlspecialchars($profesor_nombre); ?></strong>
+                        <p class="text-muted" style="margin:0; font-size:0.8rem;">Profesor responsable de la materia</p>
+                    </div>
+                </div>
+                <?php endif; ?>
 
                 <div class="responsive-layout-grid" style="display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px;">
                     <?php if ($materias_disponibles && $materias_disponibles->num_rows > 0): ?>
