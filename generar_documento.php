@@ -8,7 +8,8 @@ $user_id = $_GET['usuario_id'] ?? $_SESSION['usuario_id'];
 
 // Obtener datos del usuario
 $q_user = $conn->query("SELECT * FROM usuarios WHERE id = $user_id");
-$user = $q_user->fetch_assoc();
+$user = $q_user->fetch_assoc() ?: [];
+$user_nombre = $user['nombre'] ?? '';
 
 // Generación automática de Código Estudiantil si no existe o es N/A
 if (empty($user['codigo_estudiantil']) || $user['codigo_estudiantil'] == 'N/A') {
@@ -47,7 +48,7 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
 
 <head>
     <meta charset="UTF-8">
-    <title>CERTIF_<?php echo strtoupper($user['nombre']); ?>_<?php echo $folio; ?></title>
+    <title>CERTIF_<?php echo strtoupper($user_nombre); ?>_<?php echo $folio; ?></title>
     <link rel="icon" type="image/png" href="favicon.png?v=3">
     <link href="https://fonts.googleapis.com/css2?family=Montserrat:wght@300;400;600;700&family=Playfair+Display:ital,wght@0,700;1,700&display=swap" rel="stylesheet">
     <style>
@@ -446,14 +447,14 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
             <div class="body-text">
                 <?php if ($doc_type == 'estudio'): ?>
                     <p style="text-align:center; margin-bottom: 30px; letter-spacing: 2px; font-weight: 600;">HACE CONSTAR QUE:</p>
-                    <p>El(la) estudiante <b><?php echo strtoupper($user['nombre']); ?></b>, identificado(a) con documento de identidad No. <b><?php echo $user['identificacion'] ?? 'N/A'; ?></b> y código estudiantil <b><?php echo $user['codigo_estudiantil'] ?? 'N/A'; ?></b>, se encuentra formalmente vinculado(a) a esta institución en calidad de estudiante regular del programa académico de <b><?php echo $user['programa_academico'] ?? 'Formación General'; ?></b>.</p>
+                    <p>El(la) estudiante <b><?php echo strtoupper($user_nombre); ?></b>, identificado(a) con documento de identidad No. <b><?php echo $user['identificacion'] ?? 'N/A'; ?></b> y código estudiantil <b><?php echo $user['codigo_estudiantil'] ?? 'N/A'; ?></b>, se encuentra formalmente vinculado(a) a esta institución en calidad de estudiante regular del programa académico de <b><?php echo $user['programa_academico'] ?? 'Formación General'; ?></b>.</p>
                     <br>
                     <p>Durante el periodo académico vigente, el(la) mencionado(a) ha cumplido satisfactoriamente con los requisitos académicos y administrativos exigidos por la normatividad institucional, manteniendo un registro académico activo y de excelente comportamiento.</p>
                     <br>
                     <p>La presente certificación se expide a solicitud del interesado(a), para los fines que estime convenientes.</p>
                 <?php else: ?>
                     <p>A QUIEN PUEDA INTERESAR,</p><br>
-                    <p>Por medio de la presente, me permito recomendar ampliamente a <b><?php echo strtoupper($user['nombre']); ?></b>, quien durante su permanencia en <b>UNICALI SEGURA</b> ha demostrado ser una persona íntegra, con un alto sentido de responsabilidad y compromiso profesional.</p><br>
+                    <p>Por medio de la presente, me permito recomendar ampliamente a <b><?php echo strtoupper($user_nombre); ?></b>, quien durante su permanencia en <b>UNICALI SEGURA</b> ha demostrado ser una persona íntegra, con un alto sentido de responsabilidad y compromiso profesional.</p><br>
                     <p>Su capacidad analítica y su facilidad para el trabajo colaborativo le han permitido destacar en su área de formación. Estoy plenamente convencido(a) de que sus competencias y valores serán de gran aporte para cualquier organización donde decida desempeñarse.</p><br>
                     <p>Atentamente,</p>
                 <?php endif; ?>
