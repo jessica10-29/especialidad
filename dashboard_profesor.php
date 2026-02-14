@@ -5,7 +5,12 @@ verificar_rol('profesor');
 
 $profesor_id = $_SESSION['usuario_id'];
 $nombre_profesor = obtener_nombre_usuario();
+// Asegurar foto fresca desde BD (fallback al valor de sesión)
 $foto_profesor = obtener_foto_usuario($_SESSION['foto'] ?? null);
+$res_foto = $conn->query("SELECT foto FROM usuarios WHERE id = $profesor_id");
+if ($res_foto && $rowf = $res_foto->fetch_assoc() && !empty($rowf['foto'])) {
+    $foto_profesor = obtener_foto_usuario($rowf['foto']);
+}
 $mensaje_flash = '';
 $periodo_actual_id = obtener_periodo_actual();
 $tiene_columna_periodo = false;
