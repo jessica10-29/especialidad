@@ -6,13 +6,11 @@ if (!headers_sent()) {
     header('Content-Type: text/html; charset=UTF-8');
 }
 
-$rawHost = $_SERVER['HTTP_HOST'] ?? '';
-$hostSinPuerto = strtolower(explode(':', $rawHost)[0]);
-$isLocal = in_array($hostSinPuerto, ['localhost', '127.0.0.1', '::1']) || php_sapi_name() === 'cli';
+// Desactivar deteccion local: se asume produccion (InfinityFree)
+$isLocal = false;
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-$forzarHttps = getenv('FORCE_HTTPS') === '1';
-$httpsActivo = $httpsActivo || $forzarHttps;
+$forzarHttps = true; // siempre redirigir a HTTPS en InfinityFree
 
 // Configuracion de errores (muestra en local, oculta en produccion)
 ini_set('display_errors', $isLocal ? 1 : 0);
@@ -65,19 +63,11 @@ if (!file_exists($configPath)) {
 }
 $config = require $configPath;
 
-// Preferir variables de entorno para mayor seguridad
-$host = getenv('DB_HOST') ?: ($config['DB_HOST'] ?? 'localhost');
-$user = getenv('DB_USER') ?: ($config['DB_USER'] ?? 'root');
-$pass = getenv('DB_PASS') ?: ($config['DB_PASS'] ?? '');
-$db   = getenv('DB_NAME') ?: ($config['DB_NAME'] ?? 'universidad');
-
-// Fallback automatico en entorno local
-if ($isLocal) {
-    $host = getenv('DB_HOST_LOCAL') ?: 'localhost';
-    $user = getenv('DB_USER_LOCAL') ?: 'root';
-    $pass = getenv('DB_PASS_LOCAL') ?: '';
-    $db   = getenv('DB_NAME_LOCAL') ?: 'universidad';
-}
+// Credenciales fijas para InfinityFree (sin modo local)
+$host = $config['DB_HOST'] ?? 'sql313.infinityfree.com';
+$user = $config['DB_USER'] ?? '';
+$pass = $config['DB_PASS'] ?? '';
+$db   = $config['DB_NAME'] ?? '';
 
 // Evitar excepciones fatales de mysqli y manejar manualmente
 mysqli_report(MYSQLI_REPORT_OFF);
