@@ -150,10 +150,12 @@ function verificar_rol($rol_requerido)
 function limpiar_dato($dato)
 {
     global $conn;
-    if ($dato === null) {
+    // Tolerar valores nulos o no escalares para evitar avisos de PHP 8.2+
+    if ($dato === null || is_array($dato) || is_object($dato)) {
         return '';
     }
-    return $conn->real_escape_string(trim((string)$dato));
+    $valor = trim((string)$dato);
+    return $conn->real_escape_string($valor);
 }
 
 function obtener_nombre_usuario()
