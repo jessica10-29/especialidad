@@ -67,13 +67,14 @@ if (!file_exists($configPath)) {
 $config = require $configPath;
 
 // Seleccionar credenciales segun entorno (local vs hosting)
-$usarLocal = ($isLocal || getenv('FORZAR_LOCAL_DB') === '1') && !empty($config['DB_HOST_LOCAL']);
+// Por defecto usa la base local; para forzar la remota define FORZAR_LOCAL_DB=0
+$usarLocal = ($isLocal || getenv('FORZAR_LOCAL_DB') === '1') && getenv('FORZAR_LOCAL_DB') !== '0';
 
 if ($usarLocal) {
     $host = $config['DB_HOST_LOCAL'] ?? '127.0.0.1';
     $user = $config['DB_USER_LOCAL'] ?? 'root';
     $pass = $config['DB_PASS_LOCAL'] ?? '';
-    $db   = $config['DB_NAME_LOCAL'] ?? 'mi_bd_local';
+    $db   = $config['DB_NAME_LOCAL'] ?? 'universidad';
 } else {
     $host = $config['DB_HOST'] ?? 'sql313.byetcluster.com';
     $user = $config['DB_USER'] ?? '';
