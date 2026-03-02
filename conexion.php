@@ -6,11 +6,18 @@ if (!headers_sent()) {
     header('Content-Type: text/html; charset=UTF-8');
 }
 
-// Desactivar deteccion local: se asume produccion (InfinityFree)
-$isLocal = false;
+// Detectar si estamos en localhost para no forzar HTTPS en desarrollo
+$hostActual  = $_SERVER['HTTP_HOST'] ?? '';
+$isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1;
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-$forzarHttps = true; // siempre redirigir a HTTPS en InfinityFree
+$forceHttpsFlag = file_exists(__DIR__ . '/secure/force_https.flag');
+$forceHttpsEnv  = getenv('FORCE_HTTPS');
+$forzarHttps    = !$isLocal && (
+    $forceHttpsEnv === false
+        ? $forceHttpsFlag
+        : filter_var($forceHttpsEnv, FILTER_VALIDATE_BOOLEAN)
+); // solo forzar HTTPS si hay flag o env var en produccion
 
 // Configuracion de errores (muestra en local, oculta en produccion)
 ini_set('display_errors', $isLocal ? 1 : 0);
