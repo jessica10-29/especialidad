@@ -1,6 +1,10 @@
 # Seguridad y forzado de HTTPS (omite localhost con o sin puerto)
 RewriteEngine On
+
+# Solo redirige a HTTPS si existe el flag secure/force_https.flag
+# Útil para probar en hosting sin certificado: borra el flag y servirá por HTTP.
 RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
+RewriteCond %{DOCUMENT_ROOT}/secure/force_https.flag -f
 RewriteCond %{HTTPS} !=on
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
