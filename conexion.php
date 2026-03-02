@@ -11,7 +11,8 @@ $hostActual  = $_SERVER['HTTP_HOST'] ?? '';
 $isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1;
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-$forzarHttps = !$isLocal; // siempre forzar HTTPS en produccion
+// Forzar HTTPS fuera de localhost; por defecto activo, se puede apagar con FORZAR_HTTPS=0
+$forzarHttps = !$isLocal && getenv('FORZAR_HTTPS') !== '0';
 
 // Configuracion de errores (muestra en local, oculta en produccion)
 ini_set('display_errors', $isLocal ? 1 : 0);
@@ -64,11 +65,20 @@ if (!file_exists($configPath)) {
 }
 $config = require $configPath;
 
-// Credenciales fijas para InfinityFree (sin modo local)
-$host = $config['DB_HOST'] ?? 'sql313.infinityfree.com';
-$user = $config['DB_USER'] ?? '';
-$pass = $config['DB_PASS'] ?? '';
-$db   = $config['DB_NAME'] ?? '';
+// Seleccionar credenciales segun entorno (local vs hosting)
+$usarLocal = ($isLocal || getenv('FORZAR_LOCAL_DB') === '1') && !empty($config['DB_HOST_LOCAL']);
+
+if ($usarLocal) {
+    $host = $config['DB_HOST_LOCAL'] ?? '127.0.0.1';
+    $user = $config['DB_USER_LOCAL'] ?? 'root';
+    $pass = $config['DB_PASS_LOCAL'] ?? '';
+    $db   = $config['DB_NAME_LOCAL'] ?? 'mi_bd_local';
+} else {
+    $host = $config['DB_HOST'] ?? 'sql313.byetcluster.com';
+    $user = $config['DB_USER'] ?? '';
+    $pass = $config['DB_PASS'] ?? '';
+    $db   = $config['DB_NAME'] ?? '';
+}
 
 // Evitar excepciones fatales de mysqli y manejar manualmente
 mysqli_report(MYSQLI_REPORT_OFF);
