@@ -11,7 +11,7 @@ return [
     'DB_NAME_LOCAL' => getenv('DB_NAME_LOCAL') ?: 'universidad',
 
     // Producción (InfinityFree) - completa estos antes de subir
-    'DB_HOST' => getenv('DB_HOST') ?: 'sql313.byetcluster.com',
+'DB_HOST' => getenv('DB_HOST') ?: '',
     'DB_USER' => getenv('DB_USER') ?: '',
     'DB_PASS' => getenv('DB_PASS') ?: '',
     'DB_NAME' => getenv('DB_NAME') ?: '',

@@ -1,1 +1,4 @@
 [14-Feb-2026 11:08:31 Europe/Berlin] Error de conexion a BD (sql313.infinityfree.com): php_network_getaddresses: getaddrinfo for sql313.infinityfree.com failed: Host desconocido. 
+[02-Mar-2026 05:26:18 Europe/Berlin] Error de conexion a BD (3306): php_network_getaddresses: getaddrinfo for 3306 failed: Host desconocido. 
+[02-Mar-2026 05:26:29 Europe/Berlin] Error de conexion a BD (3306): php_network_getaddresses: getaddrinfo for 3306 failed: Host desconocido. 
+[02-Mar-2026 05:26:35 Europe/Berlin] Error de conexion a BD (3306): php_network_getaddresses: getaddrinfo for 3306 failed: Host desconocido. 
