@@ -11,13 +11,7 @@ $hostActual  = $_SERVER['HTTP_HOST'] ?? '';
 $isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1;
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-$forceHttpsFlag = file_exists(__DIR__ . '/secure/force_https.flag');
-$forceHttpsEnv  = getenv('FORCE_HTTPS');
-$forzarHttps    = !$isLocal && (
-    $forceHttpsEnv === false
-        ? $forceHttpsFlag
-        : filter_var($forceHttpsEnv, FILTER_VALIDATE_BOOLEAN)
-); // solo forzar HTTPS si hay flag o env var en produccion
+$forzarHttps = !$isLocal; // siempre forzar HTTPS en produccion
 
 // Configuracion de errores (muestra en local, oculta en produccion)
 ini_set('display_errors', $isLocal ? 1 : 0);
