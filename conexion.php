@@ -11,8 +11,9 @@ $hostActual  = $_SERVER['HTTP_HOST'] ?? '';
 $isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1;
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-// Forzar HTTPS fuera de localhost; por defecto activo, se puede apagar con FORZAR_HTTPS=0
-$forzarHttps = !$isLocal && getenv('FORZAR_HTTPS') !== '0';
+// Forzar HTTPS: siempre en hosting; en localhost solo si FORZAR_HTTPS=1
+$forzarEnv = getenv('FORZAR_HTTPS');
+$forzarHttps = $forzarEnv === '1' ? true : (!$isLocal && $forzarEnv !== '0');
 
 // Configuracion de errores (muestra en local, oculta en produccion)
 ini_set('display_errors', $isLocal ? 1 : 0);

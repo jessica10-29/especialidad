@@ -1,15 +1,19 @@
-# Seguridad y forzado de HTTPS (omite localhost con o sin puerto)
+# Seguridad y forzado de HTTPS (puede forzar tambiÃ©n en localhost)
 RewriteEngine On
 
-# Redirigir a HTTPS fuera de localhost (considera proxys como Cloudflare)
-RewriteCond %{ENV:FORZAR_HTTPS} !=0
+# Marcar entorno local para cabeceras condicionales
+SetEnvIf Host "^(localhost|127\\.0\\.0\\.1)(:\\d+)?$" IS_LOCAL=1
+
+# Opcional: forzar HTTPS tambiÃ©n en localhost si hay cert instalado
+# Activa poniendo FORZAR_HTTPS=1 en Apache o descomenta la siguiente lÃ­nea
+# SetEnv FORZAR_HTTPS 1
+
+# Redirigir a HTTPS (respeta proxys tipo Cloudflare)
+RewriteCond %{ENV:FORZAR_HTTPS} =1 [OR]
 RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
-
-# Marcar entorno local para cabeceras condicionales
-SetEnvIf Host "^(localhost|127\\.0\\.0\\.1)(:\\d+)?$" IS_LOCAL=1
 
 # Cabeceras de seguridad básicas
 <IfModule mod_headers.c>
