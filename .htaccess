@@ -1,9 +1,11 @@
 # Seguridad y forzado de HTTPS (omite localhost con o sin puerto)
 RewriteEngine On
 
-# Redirigir siempre a HTTPS fuera de localhost
+# Redirigir a HTTPS fuera de localhost (considera proxys como Cloudflare)
+RewriteCond %{ENV:FORZAR_HTTPS} !=0
 RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
 RewriteCond %{HTTPS} !=on
+RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Marcar entorno local para cabeceras condicionales
