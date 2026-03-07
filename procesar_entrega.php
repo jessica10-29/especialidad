@@ -16,11 +16,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     if (isset($_FILES['archivo']) && $_FILES['archivo']['error'] === UPLOAD_ERR_OK) {
-        $allowed = ['pdf', 'zip', 'rar', 'doc', 'docx', 'png', 'jpg', 'jpeg'];
+        $allowed = ['pdf']; // Solo PDF según solicitud
         $ext = strtolower(pathinfo($_FILES['archivo']['name'], PATHINFO_EXTENSION));
         
         if (!in_array($ext, $allowed)) {
-            die("Error: Tipo de archivo no permitido.");
+            die("Error: Solo se permiten archivos PDF.");
         }
 
         if ($_FILES['archivo']['size'] > 5 * 1024 * 1024) {

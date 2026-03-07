@@ -82,7 +82,8 @@ while ($m = $materias->fetch_assoc()) {
                         </div>
                         <div class="input-group">
                             <label class="input-label">Fecha Límite</label>
-                            <input type="datetime-local" name="fecha_limite" class="input-field" required>
+                            <input type="datetime-local" name="fecha_limite" class="input-field" required min="<?php echo date('Y-m-d\\TH:i'); ?>">
+                            <small class="text-muted">Define hasta cuándo pueden subir el PDF los estudiantes.</small>
                         </div>
                     </div>
                     <div class="input-group">
