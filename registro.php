@@ -461,9 +461,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                                     title="Debe tener 8+ caracteres, con mayúscula, minúscula, número, símbolo (@$!%*?&._-) y sin 3 caracteres iguales seguidos.">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password', this)"><i class="fa-solid fa-eye"></i></button>
-                            </div>
-                            <small class="text-muted" style="font-size: 0.78rem;">Incluye mayúsculas, minúsculas, números, un símbolo (@$!%*?&._-) y evita repetir 3 veces el mismo carácter.</small>
-                        </div>
+                           
                         <div class="input-group">
                             <label class="input-label">Confirmar Contraseña</label>
                             <div class="input-wrapper">
