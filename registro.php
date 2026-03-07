@@ -148,22 +148,73 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .hero-pane {
-            padding: 24px;
-            border-radius: 16px;
-            background: linear-gradient(145deg, rgba(56, 56, 105, .65), rgba(23, 37, 84, .70));
+            padding: 28px;
+            border-radius: 18px;
+            background: linear-gradient(140deg, #131b35, #0f172a 45%, #111827);
             border: 1px solid rgba(255, 255, 255, 0.08);
             box-shadow: 0 18px 50px rgba(0, 0, 0, 0.35);
             position: relative;
             overflow: hidden;
             backdrop-filter: blur(6px);
+            isolation: isolate;
         }
 
         .hero-pane:before {
             content: "";
             position: absolute;
-            inset: 0;
-            background: radial-gradient(circle at 18% 25%, rgba(99, 102, 241, .22), transparent 34%), radial-gradient(circle at 82% 8%, rgba(14, 165, 233, .18), transparent 26%), linear-gradient(180deg, rgba(255, 255, 255, 0.04), transparent);
+            inset: -40% -30%;
+            background: radial-gradient(circle at 30% 35%, rgba(99, 102, 241, .32), transparent 40%), radial-gradient(circle at 80% 12%, rgba(45, 212, 191, .28), transparent 36%), radial-gradient(circle at 70% 80%, rgba(14, 165, 233, .24), transparent 40%);
+            filter: blur(12px);
             pointer-events: none;
+            z-index: -1;
+        }
+
+        .hero-header {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 12px;
+        }
+
+        .hero-dot {
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #34d399;
+            box-shadow: 0 0 0 6px rgba(52, 211, 153, 0.15);
+        }
+
+        .hero-title {
+            margin: 6px 0 6px;
+            font-size: 2.05rem;
+            line-height: 1.15;
+            color: #e2e8f0;
+        }
+
+        .hero-subtitle {
+            color: #cbd5e1;
+            max-width: 540px;
+            line-height: 1.6;
+            margin-bottom: 20px;
+        }
+
+        .feature-list {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+            gap: 10px;
+        }
+
+        .mini-card {
+            padding: 12px;
+            border-radius: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+        }
+
+        .mini-card strong {
+            display: block;
+            color: #e2e8f0;
+            margin-bottom: 6px;
         }
 
         .pill {
@@ -267,17 +318,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
         <div class="register-grid">
             <div class="hero-pane">
-                <div class="pill" style="margin-bottom: 14px;"><i class="fa-solid fa-shield-halved"></i> Seguridad
-                    Unicali</div>
-                <h1 style="color: #e2e8f0; margin: 0 0 10px; font-size: 2rem;">Bienvenido a tu campus digital</h1>
-                <p style="color: #cbd5e1; max-width: 520px; line-height: 1.6;">Crea una cuenta para gestionar materias,
-                    asistencia y calificaciones con una experiencia moderna y protegida bajo HTTPS.</p>
-                <div
-                    style="display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 10px; margin-top: 20px;">
-                    <div class="pill"><i class="fa-solid fa-lock"></i> Doble validacion de contraseña</div>
-                    <div class="pill"><i class="fa-solid fa-qrcode"></i> Codigo automatico por rol</div>
+                <div class="hero-header">
+                    <span class="hero-dot"></span>
+                    <div class="pill" style="margin: 0;"><i class="fa-solid fa-shield-halved"></i> Seguridad Unicali</div>
+                </div>
+                <p class="section-title" style="margin:0;">Bienvenido a tu campus digital</p>
+                <h1 class="hero-title">Todo lo que necesitas para tu vida académica en un solo lugar.</h1>
+                <p class="hero-subtitle">Regístrate para gestionar materias, asistencia y calificaciones con cifrado, control de roles y generación automática de códigos.</p>
+
+                <div class="feature-list">
+                    <div class="pill"><i class="fa-solid fa-lock"></i> Doble validación de contraseña</div>
+                    <div class="pill"><i class="fa-solid fa-qrcode"></i> Código automático por rol</div>
                     <div class="pill"><i class="fa-solid fa-image"></i> Foto de perfil desde registro</div>
                     <div class="pill"><i class="fa-solid fa-graduation-cap"></i> Listo para notas y asistencia</div>
+                </div>
+
+                <div class="feature-list" style="margin-top:14px;">
+                    <div class="mini-card">
+                        <strong><i class="fa-solid fa-lock"></i> SSL Activo</strong>
+                        <span style="color:#cbd5e1;">Conexiones cifradas extremo a extremo.</span>
+                    </div>
+                    <div class="mini-card">
+                        <strong><i class="fa-solid fa-user-shield"></i> Roles separados</strong>
+                        <span style="color:#cbd5e1;">Accesos claros para estudiantes y docentes.</span>
+                    </div>
+                    <div class="mini-card">
+                        <strong><i class="fa-solid fa-bolt"></i> Alta disponibilidad</strong>
+                        <span style="color:#cbd5e1;">Panel rápido y optimizado para móviles.</span>
+                    </div>
                 </div>
             </div>
 
