@@ -3,6 +3,8 @@
 require_once 'conexion.php';
 
 $error = '';
+// Mostrar campo de código docente solo cuando aplica (rol profesor).
+$mostrarCodigoDocente = isset($_GET['rol']) && strtolower($_GET['rol']) === 'profesor';
 
 // Cabeceras adicionales orientadas al navegador para esta página
 if (!headers_sent()) {
@@ -52,6 +54,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     if ($resultado->num_rows === 1) {
 
         $usuario = $resultado->fetch_assoc();
+        // Si el usuario es profesor, aseguramos que el campo de código aparezca en el formulario
+        $mostrarCodigoDocente = strtolower(trim($usuario['rol'])) === 'profesor';
         $login_ok = false;
 
         // 🔐 1. Verificar contraseña hasheada
@@ -163,14 +167,16 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
 
 
-                <div class="input-group"
-                    style="border: 1px dashed var(--primary); padding: 15px; border-radius: 12px; background: rgba(99, 102, 241, 0.05); margin-top: 20px;">
-                    <label class="input-label" style="color: var(--primary);">
-                        Código de Acceso Docente (solo profesores)
-                    </label>
-                    <input type="password" name="codigo_docente" class="input-field"
-                        placeholder="Ingrese solo si es profesor" autocomplete="off">
-                </div>
+                <?php if ($mostrarCodigoDocente): ?>
+                    <div class="input-group"
+                        style="border: 1px dashed var(--primary); padding: 15px; border-radius: 12px; background: rgba(99, 102, 241, 0.05); margin-top: 20px;">
+                        <label class="input-label" style="color: var(--primary);">
+                            Código de Acceso Docente (solo profesores)
+                        </label>
+                        <input type="password" name="codigo_docente" class="input-field"
+                            placeholder="Ingrese solo si es profesor" autocomplete="off">
+                    </div>
+                <?php endif; ?>
 
 
 

@@ -27,7 +27,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $valido = true;
 
     if (strlen($password) < 8) {
-        $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> La contrase�a debe tener al menos 8 caracteres.</div>';
+        $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> La contraseña debe tener al menos 8 caracteres.</div>';
         $valido = false;
     }
 
@@ -295,7 +295,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="two-col">
                         <div class="input-group">
                             <label class="input-label">Nombre Completo</label>
-                            <input type="text" name="nombre" class="input-field" placeholder="Ej. Juan P�rez" required>
+                            <input type="text" name="nombre" class="input-field" placeholder="Ej. Juan Pérez" required>
                         </div>
                         <div class="input-group">
                             <label class="input-label">Cedula / Identificacion</label>
@@ -373,7 +373,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label class="input-label">Contraseña</label>
                             <div class="input-wrapper">
                                 <input type="password" name="password" id="password" class="input-field"
-                                    placeholder="M�nimo 8 caracteres" required oninput="validarCoincidencia()">
+                                    placeholder="Mínimo 8 caracteres" required oninput="validarCoincidencia()">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password', this)"><i class="fa-solid fa-eye"></i></button>
                             </div>
@@ -382,7 +382,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label class="input-label">Confirmar Contraseña</label>
                             <div class="input-wrapper">
                                 <input type="password" name="password_confirm" id="password_confirm" class="input-field"
-                                    placeholder="Repite tu contrase�a" required oninput="validarCoincidencia()">
+                                    placeholder="Repite tu contraseña" required oninput="validarCoincidencia()">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password_confirm', this)"><i
                                         class="fa-solid fa-eye"></i></button>
