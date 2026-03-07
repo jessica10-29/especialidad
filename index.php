@@ -16,40 +16,34 @@
     <link rel="apple-touch-icon" href="/favicon.png?v=3">
 </head>
 
-<body>
+<body class="home-page">
     <div class="background-mesh"></div>
 
     <div class="login-container">
         <div class="glass-panel login-box fade-in" style="max-width: 600px;">
-            <div class="logo-area" style="margin-bottom: 40px;">
+            <div class="logo-area" style="margin-bottom: 40px; text-align: center;">
                 <i class="fa-solid fa-graduation-cap logo-large"></i>
                 <h1 style="font-size: 3rem; line-height: 1; margin-bottom: 10px;">Unicali<span
                         class="text-gradient">Segura</span></h1>
                 <p class="text-muted">La evolución de la gestión académica universitaria.</p>
             </div>
 
-            <div
-                style="display: grid; grid-template-columns: 1fr 1fr; gap: 20px; text-align: left; margin-bottom: 40px;">
-                <a href="login.php?rol=profesor" class="glass-panel"
-                    style="padding: 30px 20px; text-decoration: none; color: inherit; transition: var(--transition); border: 1px solid rgba(255,255,255,0.05);">
-                    <div
-                        style="background: rgba(99, 102, 241, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                        <i class="fa-solid fa-chalkboard-user" style="font-size: 1.5rem; color: var(--primary);"></i>
+            <div class="cta-grid"
+                style="display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 20px; text-align: left; margin-bottom: 40px;">
+                <a href="login.php?rol=profesor" class="glass-panel cta-card cta-prof">
+                    <div class="cta-icon cta-icon-prof">
+                        <i class="fa-solid fa-chalkboard-user"></i>
                     </div>
-                    <h3 style="margin-bottom: 8px;">Docentes</h3>
-                    <p class="text-muted" style="font-size: 0.8rem;">Gestiona tus clases, notas y asistencia en un solo
-                        lugar.</p>
+                    <h3>Docentes</h3>
+                    <p class="text-muted">Gestiona tus clases, notas y asistencia en un solo lugar.</p>
                 </a>
 
-                <a href="login.php?rol=estudiante" class="glass-panel"
-                    style="padding: 30px 20px; text-decoration: none; color: inherit; transition: var(--transition); border: 1px solid rgba(255,255,255,0.05);">
-                    <div
-                        style="background: rgba(6, 182, 212, 0.1); width: 50px; height: 50px; border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-bottom: 20px;">
-                        <i class="fa-solid fa-user-graduate" style="font-size: 1.5rem; color: var(--secondary);"></i>
+                <a href="login.php?rol=estudiante" class="glass-panel cta-card cta-est">
+                    <div class="cta-icon cta-icon-est">
+                        <i class="fa-solid fa-user-graduate"></i>
                     </div>
-                    <h3 style="margin-bottom: 8px;">Estudiantes</h3>
-                    <p class="text-muted" style="font-size: 0.8rem;">Consulta tus notas, historial y progreso académico
-                        diario.</p>
+                    <h3>Estudiantes</h3>
+                    <p class="text-muted">Consulta tus notas, historial y progreso académico diario.</p>
                 </a>
             </div>
 

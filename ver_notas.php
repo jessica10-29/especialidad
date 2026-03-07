@@ -114,7 +114,10 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
                     <i class="fa-solid fa-house"></i> Inicio
                 </a>
                 <a href="generar_documento.php?tipo=estudio" target="_blank" class="nav-link" style="color: #fbbf24; font-weight: 700;">
-                    <i class="fa-solid fa-certificate"></i> Certificado Oficial
+                    <i class="fa-solid fa-certificate"></i> Certificado de Estudio
+                </a>
+                <a href="pdf.php" target="_blank" class="nav-link" style="color: #22d3ee; font-weight: 700;">
+                    <i class="fa-solid fa-file-pdf"></i> Certificado de Notas
                 </a>
                 <a href="ver_asistencia.php" class="nav-link">
                     <i class="fa-solid fa-calendar-check"></i> Mis Asistencias
@@ -141,6 +144,9 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
                         <h1 class="text-gradient">Mis Calificaciones</h1>
                         <p class="text-muted">Selecciona una materia para ver tus notas detalladas.</p>
                     </div>
+                    <a href="pdf.php" target="_blank" class="btn btn-outline" style="background: rgba(34, 211, 238, 0.12); border-color: rgba(34, 211, 238, 0.25); color: #22d3ee; height: 44px;">
+                        <i class="fa-solid fa-file-arrow-down"></i> Descargar certificado de notas (PDF)
+                    </a>
                 </header>
                 <?php if (!empty($profesor_nombre)): ?>
                 <div style="display:flex; align-items:center; gap:12px; margin-bottom: 20px;">
@@ -399,8 +405,8 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
                 <input type="hidden" name="materia_nombre" value="<?php echo htmlspecialchars($nombre_materia); ?>">
                 
                 <div class="input-group">
-                    <label class="input-label">Archivo (PDF, ZIP, DOCX - Max 5MB)</label>
-                    <input type="file" name="archivo" class="input-field" required style="padding: 10px;">
+                    <label class="input-label">Archivo (solo PDF - Max 5MB)</label>
+                    <input type="file" name="archivo" class="input-field" accept=".pdf" required style="padding: 10px;">
                 </div>
 
                 <div class="input-group">

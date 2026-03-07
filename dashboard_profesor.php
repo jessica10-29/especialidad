@@ -131,7 +131,7 @@ $estudiantes = $conn->query("
                 <i class="fa-solid fa-graduation-cap logo-icon" style="font-size: 2rem; color: var(--primary);"></i>
                 <h3 style="color: white; margin-top: 10px;">
                     Unicali
-                    <span style="background: linear-gradient(135deg, #60a5fa, #8b5cf6, #c084fc); -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">
+                    <span style="background: linear-gradient(135deg, #60a5fa, #8b5cf6, #c084fc); background-clip: text; -webkit-background-clip: text; -webkit-text-fill-color: transparent; display: inline-block;">
                         Segura
                     </span>
                     <span style="color: var(--primary);">Docente</span>
@@ -155,7 +155,7 @@ $estudiantes = $conn->query("
                     <i class="fa-solid fa-clipboard-user"></i> Asistencia
                 </a>
                 <a href="generar_documento.php?tipo=estudio" target="_blank" class="nav-link" style="color: #fbbf24; font-weight: 700;">
-                    <i class="fa-solid fa-certificate"></i> Certificado Oficial
+                    <i class="fa-solid fa-certificate"></i> Certificado (propio)
                 </a>
                 <a href="perfil.php" class="nav-link">
                     <i class="fa-solid fa-gear"></i> Configuración
@@ -325,6 +325,12 @@ $estudiantes = $conn->query("
                                         </a>
                                         <a href="asistencia.php?student=<?php echo urlencode($e['nombre']); ?>" class="btn btn-outline" style="font-size:0.78rem; padding:8px 12px; border-color: rgba(16,185,129,0.35); color: #10b981;">
                                             <i class="fa-solid fa-clipboard-user"></i> Asistencia
+                                        </a>
+                                        <a href="generar_documento.php?tipo=estudio&usuario_id=<?php echo (int)$e['id']; ?>" target="_blank" class="btn btn-outline" style="font-size:0.78rem; padding:8px 12px; border-color: rgba(251,191,36,0.4); color: #fbbf24;">
+                                            <i class="fa-solid fa-file-circle-check"></i> Cert. estudio
+                                        </a>
+                                        <a href="pdf.php?estudiante_id=<?php echo (int)$e['id']; ?>" target="_blank" class="btn btn-outline" style="font-size:0.78rem; padding:8px 12px; border-color: rgba(34,211,238,0.35); color: #22d3ee;">
+                                            <i class="fa-solid fa-file-pdf"></i> Cert. notas
                                         </a>
                                     </div>
                                 </div>

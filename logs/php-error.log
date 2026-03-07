@@ -2,3 +2,6 @@
 [02-Mar-2026 05:26:18 Europe/Berlin] Error de conexion a BD (3306): php_network_getaddresses: getaddrinfo for 3306 failed: Host desconocido. 
 [02-Mar-2026 05:26:29 Europe/Berlin] Error de conexion a BD (3306): php_network_getaddresses: getaddrinfo for 3306 failed: Host desconocido. 
 [02-Mar-2026 05:26:35 Europe/Berlin] Error de conexion a BD (3306): php_network_getaddresses: getaddrinfo for 3306 failed: Host desconocido. 
+[07-Mar-2026 05:43:14 Europe/Berlin] PHP Deprecated:  strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated in C:\xampp\htdocs\especialidad\dashboard_estudiante.php on line 138
+[07-Mar-2026 05:44:22 Europe/Berlin] PHP Deprecated:  strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated in C:\xampp\htdocs\especialidad\dashboard_estudiante.php on line 138
+[07-Mar-2026 05:45:15 Europe/Berlin] PHP Deprecated:  strtotime(): Passing null to parameter #1 ($datetime) of type string is deprecated in C:\xampp\htdocs\especialidad\dashboard_estudiante.php on line 138

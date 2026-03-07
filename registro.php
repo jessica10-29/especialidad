@@ -164,6 +164,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             overflow: hidden;
             backdrop-filter: blur(6px);
             isolation: isolate;
+            text-align: center;
         }
 
         .hero-pane:before {
@@ -179,6 +180,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         .hero-header {
             display: flex;
             align-items: center;
+            justify-content: center;
             gap: 10px;
             margin-bottom: 12px;
         }
@@ -192,23 +194,38 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         }
 
         .hero-title {
-            margin: 6px 0 6px;
-            font-size: 2.05rem;
+            margin: 6px auto 10px;
+            font-size: 2.15rem;
             line-height: 1.15;
             color: #e2e8f0;
+            max-width: 640px;
+        }
+
+        .hero-highlight {
+            background: linear-gradient(120deg, #a855f7, #6366f1, #22d3ee);
+            -webkit-background-clip: text;
+            background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
 
         .hero-subtitle {
             color: #cbd5e1;
-            max-width: 540px;
+            max-width: 640px;
             line-height: 1.6;
-            margin-bottom: 20px;
+            margin: 0 auto 20px;
+        }
+
+        /* Centrar pastilla de seguridad dentro del hero */
+        .hero-pane .pill {
+            margin: 0 auto 12px;
+            justify-content: center;
         }
 
         .feature-list {
             display: grid;
             grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
             gap: 10px;
+            justify-items: center;
         }
 
         .mini-card {
@@ -316,7 +333,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
 <body>
     <div class="background-mesh"></div>
-    <div class="login-container" style="padding: 30px 18px;">
+    <div class="login-container" style="padding: 80px 18px 48px;">
         <div style="position: absolute; top: 30px; left: 30px;">
             <a href="index.php" class="btn btn-outline" style="padding: 10px 15px;">
                 <i class="fa-solid fa-arrow-left"></i> Volver
@@ -330,7 +347,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <div class="pill" style="margin: 0;"><i class="fa-solid fa-shield-halved"></i> Seguridad Unicali</div>
                 </div>
                 <p class="section-title" style="margin:0;">Bienvenido a tu campus digital</p>
-                <h1 class="hero-title">Todo lo que necesitas para tu vida académica en un solo lugar.</h1>
+                <h1 class="hero-title"><span class="hero-highlight">Todo lo que necesitas</span> para tu vida académica en un solo lugar.</h1>
                 <p class="hero-subtitle">Regístrate para gestionar materias, asistencia y calificaciones con cifrado, control de roles y generación automática de códigos.</p>
 
                 <div class="feature-list">

@@ -77,8 +77,8 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
                 <a href="dashboard_estudiante.php" class="nav-link active">
                     <i class="fa-solid fa-house"></i> Inicio
                 </a>
-                <a href="generar_documento.php?tipo=estudio" target="_blank" class="nav-link" style="color: #fbbf24; font-weight: 700;">
-                    <i class="fa-solid fa-certificate"></i> Certificado Oficial
+                <a href="pdf.php" target="_blank" class="nav-link" style="color: #22d3ee; font-weight: 700;">
+                    <i class="fa-solid fa-file-pdf"></i> Certificado de Notas
                 </a>
                 <a href="ver_asistencia.php" class="nav-link">
                     <i class="fa-solid fa-calendar-check"></i> Mis Asistencias
@@ -125,43 +125,40 @@ $materias_ganando = ($res_ganando && $row_g = $res_ganando->fetch_assoc()) ? (in
                 <?php 
                 $habil_global = es_periodo_habil();
                 $p_res = $conn->query("SELECT nombre, limite_notas FROM periodos WHERE id = $p_actual_id");
-                $p_info = $p_res->fetch_assoc();
+                $ano_actual = date('Y');
+                $p_info = ($p_res && $p_res->num_rows > 0) ? $p_res->fetch_assoc() : ['nombre' => "Emergencia $ano_actual", 'limite_notas' => null];
+                $nombre_periodo = $p_info['nombre'] ?? "Emergencia $ano_actual";
+                // Si el nombre trae un año anterior, reemplazarlo por el año actual
+                if (stripos($nombre_periodo, 'emergencia') !== false) {
+                    $nombre_periodo = preg_replace('/20\\d{2}/', $ano_actual, $nombre_periodo);
+                }
+                $limite_notas = $p_info['limite_notas'] ?? null;
+                $fecha_limite = $limite_notas ? date('d M, Y', strtotime($limite_notas)) : date('d M, Y'); // usa fecha actual si no hay límite
+                $vencida = $limite_notas ? strtotime($limite_notas) < time() : false;
+                $estado_portal = $habil_global ? 'Abierto' : 'Cerrado';
                 ?>
                 <div class="card glass-panel fade-in" style="flex: 1 1 300px; background: <?php echo $habil_global ? 'rgba(16, 185, 129, 0.1)' : 'rgba(244, 63, 94, 0.1)'; ?>; border: 1px solid <?php echo $habil_global ? '#10b981' : '#f43f5e'; ?>; padding: 20px; display: flex; align-items: center; gap: 20px;">
                     <div style="font-size: 2.5rem; color: <?php echo $habil_global ? '#10b981' : '#f43f5e'; ?>;">
                         <i class="fa-solid <?php echo $habil_global ? 'fa-door-open' : 'fa-door-closed'; ?>"></i>
                     </div>
                     <div>
-                        <h4 style="margin: 0; color: white;">Estado Académico: <?php echo htmlspecialchars($p_info['nombre']); ?></h4>
+                        <h4 style="margin: 0; color: white;">Estado Académico: <?php echo htmlspecialchars($nombre_periodo); ?></h4>
                         <p style="margin: 5px 0; font-size: 0.9rem; color: rgba(255,255,255,0.7);">
                             <?php if ($habil_global): ?>
-                                El portal está <strong>Abierto</strong>. Fecha límite de trabajos: <?php echo date('d M, Y', strtotime($p_info['limite_notas'])); ?>
+                                El portal está <strong><?php echo $estado_portal; ?></strong>. Fecha límite de trabajos: <?php echo $fecha_limite; ?><?php echo $vencida ? ' (Vencida)' : ''; ?>
                             <?php else: ?>
-                                El portal está <strong>Cerrado</strong>. El periodo de gestión ha finalizado.
+                                El portal está <strong><?php echo $estado_portal; ?></strong>. El periodo de gestión ha finalizado.
                             <?php endif; ?>
                         </p>
-                    </div>
-                </div>
-
-                <div class="card glass-panel fade-in responsive-banner-card" style="flex:1 1 420px; background: linear-gradient(135deg, rgba(251, 191, 36, 0.22) 0%, rgba(180, 83, 9, 0.12) 100%); border: 3px solid #fbbf24; padding: 20px; position: relative; overflow: hidden; box-shadow: 0 0 35px rgba(251, 191, 36, 0.22); border-radius: 16px;">
-                    <div class="responsive-hidden-icon" style="position: absolute; top: -30px; right: -30px; font-size: 15rem; color: rgba(251, 191, 36, 0.1); transform: rotate(15deg); pointer-events: none;">
-                        <i class="fa-solid fa-scroll"></i>
-                    </div>
-                    <div class="responsive-flex-column" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 20px; position: relative; z-index: 1;">
-                        <div style="flex: 1; min-width: 260px;">
-                            <span style="background: #fbbf24; color: #1e293b; padding: 6px 18px; border-radius: 50px; font-size: 0.8rem; font-weight: 900; text-transform: uppercase; letter-spacing: 2px; display: inline-block; margin-bottom: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.3);">¡NUEVO! Trámite Disponible</span>
-                            <h2 class="responsive-text-lg" style="color: #fbbf24; margin-bottom: 10px; font-size: 2.1rem; font-family: 'Space Grotesk', sans-serif; text-shadow: 0 2px 10px rgba(0,0,0,0.5);">Certificado de Estudio</h2>
-                            <p class="responsive-text-md" style="color: white; font-size: 1.05rem; line-height: 1.5; opacity: 1; font-weight: 500;">
-                                Descarga tu certificación oficial de matrícula con código QR y firma digital.
-                            </p>
-                        </div>
-                        <div class="responsive-btn-container" style="text-align: center;">
-                            <a href="generar_documento.php?tipo=estudio" target="_blank" class="btn" style="background: #fbbf24; color: #1e293b; padding: 18px 32px; font-size: 1.1rem; font-weight: 900; border-radius: 16px; box-shadow: 0 16px 32px rgba(251, 191, 36, 0.45); text-transform: uppercase; letter-spacing: 1px; transition: all 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275); border: none; display: flex; align-items: center; gap: 12px; cursor: pointer;">
-                                <i class="fa-solid fa-file-pdf" style="font-size: 1.6rem;"></i> Generar
+                        <div style="margin-top: 8px;">
+                            <a href="ver_notas.php" class="btn btn-outline" style="padding:8px 12px; font-size:0.85rem;">
+                                Ver entregas y fechas
                             </a>
                         </div>
                     </div>
                 </div>
+
+
 
             </div>
 

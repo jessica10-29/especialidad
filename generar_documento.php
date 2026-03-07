@@ -4,7 +4,21 @@ require_once 'conexion.php';
 verificar_sesion();
 
 $doc_type = $_GET['tipo'] ?? 'estudio'; // estudio, recomendacion, respuesta
-$user_id = $_GET['usuario_id'] ?? $_SESSION['usuario_id'];
+$user_id = $_SESSION['usuario_id'];
+$rol_sesion = $_SESSION['rol'] ?? '';
+
+// Permitir a profesores generar certificados para sus estudiantes (no para otros)
+if ($rol_sesion === 'profesor' && isset($_GET['usuario_id'])) {
+    $solicitado = (int) $_GET['usuario_id'];
+    // Validar que el estudiante esté en alguna materia del profesor
+    $prof_id = (int) $_SESSION['usuario_id'];
+    $q_val = $conn->query("SELECT 1 FROM matriculas m JOIN materias mat ON m.materia_id = mat.id WHERE m.estudiante_id = $solicitado AND mat.profesor_id = $prof_id LIMIT 1");
+    if ($q_val && $q_val->num_rows > 0) {
+        $user_id = $solicitado;
+    }
+}
+// Los estudiantes siempre usan su propio ID (ignora cualquier parámetro externo)
+$user_id = ($rol_sesion === 'estudiante') ? (int)$_SESSION['usuario_id'] : (int)$user_id;
 
 // Obtener datos del usuario
 $q_user = $conn->query("SELECT * FROM usuarios WHERE id = $user_id");
@@ -14,9 +28,13 @@ $user_defaults = [
     'identificacion' => 'N/A',
     'codigo_estudiantil' => 'N/A',
     'programa_academico' => 'Formación General',
+    'semestre' => 'N/A',
+    'rol' => 'estudiante',
 ];
 $user = array_merge($user_defaults, $user);
 $user_nombre = $user['nombre'];
+$rol_usuario = strtolower($user['rol'] ?? 'estudiante');
+$es_docente = $rol_usuario === 'profesor';
 
 // Generación automática de Código Estudiantil si no existe o es N/A
 if (empty($user['codigo_estudiantil']) || $user['codigo_estudiantil'] == 'N/A') {
@@ -43,12 +61,26 @@ $fecha_esp = date('d') . ' de ' . $meses[date('F')] . ' de ' . date('Y');
 // Folio sincronizado con verificar.php (UC-ID)
 $folio = "UC-" . $user_id;
 
+// Promedio general del estudiante
+$promedio_estudiante = 'N/D';
+$q_prom = $conn->query("SELECT AVG(n.valor) AS prom FROM notas n JOIN matriculas m ON n.matricula_id = m.id WHERE m.estudiante_id = $user_id");
+if ($q_prom && ($pr = $q_prom->fetch_assoc()) && $pr['prom'] !== null) {
+    $promedio_estudiante = number_format((float)$pr['prom'], 2);
+}
+
 // Generar URL de Verificación
 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
 $host = $_SERVER['HTTP_HOST'];
-$dir = dirname($_SERVER['REQUEST_URI']);
-$verify_url = "{$protocol}://{$host}{$dir}/verificar.php?folio={$folio}";
-$qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . urlencode($verify_url) . "&choe=UTF-8";
+$dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
+$base_path = $dir === '/' ? '' : $dir;
+$verify_url = "{$protocol}://{$host}{$base_path}/verificar.php?folio=" . rawurlencode($folio);
+// Proveedor principal (qrserver) y fallback a Google Charts si falla la carga
+$qr_api_url = "https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=" . urlencode($verify_url);
+$qr_fallback = "https://chart.googleapis.com/chart?chs=170x170&cht=qr&chl=" . urlencode($verify_url) . "&choe=UTF-8";
+
+// Código de barras con datos esenciales del estudiante
+$barcode_data = "UNICALI|ID:{$user_id}|NOMBRE:{$user['nombre']}|DOC:{$user['identificacion']}|COD:{$user['codigo_estudiantil']}|PROG:{$user['programa_academico']}";
+$barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencode($barcode_data) . "&includetext&scale=2&background=ffffff";
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -95,10 +127,8 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            padding: 2cm 2.5cm 1.5cm 2.5cm;
-            /* Padding vertical reducido */
+            padding: 1.8cm 2cm 1.6cm 2cm;
             overflow: hidden;
-            /* Forzado de contención */
         }
 
         /* 🏆 BORDE DE LUJO */
@@ -235,13 +265,10 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
         .body-text {
             text-align: justify;
             font-size: 13pt;
-            line-height: 1.7;
-            /* Reducido de 1.8 */
-            padding: 0 0.5cm;
-            margin-bottom: 15px;
-            /* Reducido */
+            line-height: 1.65;
+            padding: 0 0.35cm;
+            margin-bottom: 12px;
             flex-grow: 1;
-            /* Esto empuja el resto hacia abajo */
         }
 
         .body-text b {
@@ -295,19 +322,43 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
         /* 📜 SELLO Y QR - Ahora en flujo relativo para no solapar */
         .bottom-verification {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
+            justify-content: center;
             align-items: center;
-            padding: 0 0.8cm;
-            margin-top: 10px;
-            margin-bottom: 15px;
-            /* Margen para no pisar el footer */
+            gap: 12px;
+            padding: 0 0.3cm;
+            margin-top: 4px;
+            margin-bottom: 6px;
         }
 
         .qr-area {
-            text-align: left;
+            text-align: center;
             display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 12px;
+            justify-content: center;
+            gap: 8px;
+            width: 100%;
+            max-width: 520px;
+        }
+
+        .barcode-area {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            font-size: 8pt;
+            color: var(--primary);
+            text-align: center;
+        }
+
+        .barcode-img {
+            width: 210px;
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #d1d5db;
+            padding: 6px;
+            background: white;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
         }
 
         .qr-image {
@@ -319,6 +370,16 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
             padding: 3px;
             background: white;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+        }
+
+        .qr-info {
+            font-size: 8.4pt;
+            color: var(--primary);
+            line-height: 1.45;
+            max-width: 500px;
+            word-wrap: break-word;
+            word-break: break-word;
+            text-align: center;
         }
 
         .digital-seal {
@@ -454,9 +515,15 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
             <div class="body-text">
                 <?php if ($doc_type == 'estudio'): ?>
                     <p style="text-align:center; margin-bottom: 30px; letter-spacing: 2px; font-weight: 600;">HACE CONSTAR QUE:</p>
-                    <p>El(la) estudiante <b><?php echo strtoupper($user_nombre); ?></b>, identificado(a) con documento de identidad No. <b><?php echo $user['identificacion'] ?? 'N/A'; ?></b> y código estudiantil <b><?php echo $user['codigo_estudiantil'] ?? 'N/A'; ?></b>, se encuentra formalmente vinculado(a) a esta institución en calidad de estudiante regular del programa académico de <b><?php echo $user['programa_academico'] ?? 'Formación General'; ?></b>.</p>
-                    <br>
-                    <p>Durante el periodo académico vigente, el(la) mencionado(a) ha cumplido satisfactoriamente con los requisitos académicos y administrativos exigidos por la normatividad institucional, manteniendo un registro académico activo y de excelente comportamiento.</p>
+                    <?php if ($es_docente): ?>
+                        <p>El(la) docente <b><?php echo strtoupper($user_nombre); ?></b>, identificado(a) con documento de identidad No. <b><?php echo $user['identificacion'] ?? 'N/A'; ?></b> y código institucional <b><?php echo $user['codigo_estudiantil'] ?? 'N/A'; ?></b>, se encuentra formalmente vinculado(a) a esta institución en calidad de profesor(a), adscrito(a) a las unidades académicas que le sean asignadas.</p>
+                        <br>
+                        <p>Durante su ejercicio profesional ha cumplido con los estándares académicos y administrativos definidos por la institución, manteniendo un desempeño satisfactorio en sus funciones docentes.</p>
+                    <?php else: ?>
+                        <p>El(la) estudiante <b><?php echo strtoupper($user_nombre); ?></b>, identificado(a) con documento de identidad No. <b><?php echo $user['identificacion'] ?? 'N/A'; ?></b> y código estudiantil <b><?php echo $user['codigo_estudiantil'] ?? 'N/A'; ?></b>, se encuentra formalmente vinculado(a) a esta institución en calidad de estudiante regular del programa académico de <b><?php echo $user['programa_academico'] ?? 'Formación General'; ?></b>, cursando el semestre <b><?php echo $user['semestre'] ?? 'N/A'; ?></b>.</p>
+                        <br>
+                        <p>Durante el periodo académico vigente, el(la) mencionado(a) ha cumplido satisfactoriamente con los requisitos académicos y administrativos exigidos por la normatividad institucional, manteniendo un registro académico activo y de excelente comportamiento.</p>
+                    <?php endif; ?>
                     <br>
                     <p>La presente certificación se expide a solicitud del interesado(a), para los fines que estime convenientes.</p>
                 <?php else: ?>
@@ -495,8 +562,17 @@ $qr_api_url = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . url
 
             <div class="bottom-verification">
                 <div class="qr-area">
-                    <img src="<?php echo $qr_api_url; ?>" alt="QR Verification" class="qr-image" onerror="this.src='https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=<?php echo urlencode($verify_url); ?>'">
-                    <div style="font-size: 8pt; color: var(--primary); font-weight: 800; letter-spacing: 1px;">FOLIO DE VERIFICACIÓN: <?php echo $folio; ?></div>
+                    <img src="<?php echo $qr_api_url; ?>" alt="QR Verification" class="qr-image" onerror="this.src='<?php echo $qr_fallback; ?>'">
+                    <div class="qr-info">
+                        <div style="font-weight: 800; letter-spacing: 1px;">FOLIO DE VERIFICACIÓN: <?php echo $folio; ?></div>
+                        <div><?php echo $es_docente ? 'Docente' : 'Estudiante'; ?>: <strong><?php echo strtoupper($user_nombre); ?></strong></div>
+                        <div>Rol: <?php echo $es_docente ? 'Profesor' : 'Estudiante'; ?> | Programa: <?php echo htmlspecialchars($user['programa_academico']); ?><?php if (!$es_docente): ?> | Semestre: <?php echo htmlspecialchars($user['semestre']); ?><?php endif; ?></div>
+                        <div>ID: <?php echo htmlspecialchars($user['identificacion']); ?> | Código: <?php echo htmlspecialchars($user['codigo_estudiantil']); ?></div>
+                        <?php if (!$es_docente): ?>
+                            <div>Desempeño promedio: <strong><?php echo $promedio_estudiante; ?></strong> / 5.0</div>
+                        <?php endif; ?>
+                        <div style="font-size: 7.5pt; color: var(--secondary);">Escanea para validar en línea y ver registro oficial.</div>
+                    </div>
                 </div>
 
                 <div class="digital-seal">

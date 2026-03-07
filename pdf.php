@@ -7,7 +7,23 @@ verificar_sesion();
 ini_set('display_errors', 0);
 error_reporting(E_ALL);
 
-$id = $_SESSION['usuario_id'];
+$rol_sesion = $_SESSION['rol'] ?? '';
+$id_sesion = (int)$_SESSION['usuario_id'];
+
+// Seleccionar estudiante objetivo (profesor puede elegir uno propio)
+$id = $id_sesion;
+if ($rol_sesion === 'profesor' && isset($_GET['estudiante_id'])) {
+    $est_id = (int)$_GET['estudiante_id'];
+    $qval = $conn->query("SELECT 1 FROM matriculas m JOIN materias mat ON m.materia_id = mat.id WHERE m.estudiante_id = $est_id AND mat.profesor_id = $id_sesion LIMIT 1");
+    if ($qval && $qval->num_rows > 0) {
+        $id = $est_id;
+    }
+}
+// Estudiante solo descarga su propio certificado
+if ($rol_sesion === 'estudiante') {
+    $id = $id_sesion;
+}
+
 $fecha_reporte = date('d/m/Y');
 
 // Obtener datos completos del estudiante
@@ -436,7 +452,7 @@ if (!$res) {
             <div style="flex-grow: 1; min-height: 50px;"></div>
 
             <!-- Verification QR - Refactorizado para máxima compatibilidad -->
-            <div class="qr-section-container" style="display: flex; justify-content: flex-start; align-items: center; gap: 25px; border: 2px solid #f1f5f9; padding: 20px; border-radius: 16px; background: #fafafa; margin-top: 50px; position: relative; z-index: 10;">
+            <div class="qr-section-container" style="display: flex; justify-content: center; align-items: center; gap: 18px; border: 2px solid #f1f5f9; padding: 16px; border-radius: 16px; background: #fafafa; margin: 30px auto 0; position: relative; z-index: 10; max-width: 640px; width: 100%; box-sizing: border-box;">
                 <?php
                 $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
                 $folio_id = str_pad($id, 8, "0", STR_PAD_LEFT);
