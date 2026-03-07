@@ -31,6 +31,13 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $valido = false;
     }
 
+    // Complejidad mínima: mayúscula, minúscula, número y símbolo
+    $regex_segura = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-\\[\\]{};:\"\\\\|,.<>\\/?]).{8,}$/';
+    if ($valido && !preg_match($regex_segura, $password)) {
+        $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> Usa una contraseña segura: 8+ caracteres con mayúscula, minúscula, número y símbolo.</div>';
+        $valido = false;
+    }
+
     if ($password !== $password_confirm) {
         $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> Las contraseñas no coinciden.</div>';
         $valido = false;
@@ -441,16 +448,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label class="input-label">Contraseña</label>
                             <div class="input-wrapper">
                                 <input type="password" name="password" id="password" class="input-field"
-                                    placeholder="Mínimo 8 caracteres" required oninput="validarCoincidencia()">
+                                    placeholder="Mínimo 8 caracteres" required oninput="validarCoincidencia()"
+                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-\\[\\]{};:'\\\"\\\\|,.<>\\/?]).{8,}"
+                                    title="Debe tener 8+ caracteres, con mayúscula, minúscula, número y símbolo.">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password', this)"><i class="fa-solid fa-eye"></i></button>
                             </div>
+                            <small class="text-muted" style="font-size: 0.78rem;">Incluye mayúsculas, minúsculas, números y símbolos.</small>
                         </div>
                         <div class="input-group">
                             <label class="input-label">Confirmar Contraseña</label>
                             <div class="input-wrapper">
                                 <input type="password" name="password_confirm" id="password_confirm" class="input-field"
-                                    placeholder="Repite tu contraseña" required oninput="validarCoincidencia()">
+                                    placeholder="Repite tu contraseña" required oninput="validarCoincidencia()"
+                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[!@#$%^&*()_+\\-\\[\\]{};:'\\\"\\\\|,.<>\\/?]).{8,}"
+                                    title="Debe tener 8+ caracteres, con mayúscula, minúscula, número y símbolo.">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password_confirm', this)"><i
                                         class="fa-solid fa-eye"></i></button>
