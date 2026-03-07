@@ -26,18 +26,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $rol = 'estudiante';
     $valido = true;
 
-    if (strlen($password) < 8) {
-        $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> La contraseña debe tener al menos 8 caracteres.</div>';
-        $valido = false;
-    }
-
-    // Complejidad mínima: mayúscula, minúscula, número y símbolo
-    $regex_segura = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&._-]).{8,}$/';
-    if ($valido && !preg_match($regex_segura, $password)) {
-        $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"> </i> Usa una contraseña segura: 8+ caracteres con mayúscula, minúscula, número y símbolo (@$!%*?&._-).</div>';
-        $valido = false;
-    }
-
     if ($password !== $password_confirm) {
         $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> Las contraseñas no coinciden.</div>';
         $valido = false;
@@ -444,7 +432,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     </div>
 
                     <div style="border: 1px dashed var(--glass-border); padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.03); margin-top: 6px; font-size: 0.9rem; color: #cbd5e1;">
-                        <strong style="color:#e2e8f0;">Cómo crear tu contraseña segura:</strong><br>
+                        <strong style="color:#e2e8f0;"> Crear tu contraseña segura:</strong><br>
                         • Mínimo 8 caracteres.<br>
                         • Debe incluir al menos una mayúscula, una minúscula, un número y un símbolo permitido (@ $ ! % * ? & . _ -).<br>
                         • Evita datos personales o usar la misma clave en otros sitios.
