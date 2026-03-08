@@ -214,6 +214,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             display: flex;
             flex-direction: column;
             text-align: center;
+            max-width: 170mm;
+            width: 100%;
+            margin: 0 auto;
+            padding: 0 0.4cm;
         }
 
         .header {
@@ -362,14 +366,24 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .qr-image {
-            width: 85px;
-            /* Reducido */
-            height: 85px;
-            /* Reducido */
+            width: 170px;
+            height: 170px;
             border: 1.5px solid var(--accent);
-            padding: 3px;
+            padding: 5px;
             background: white;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
+            image-rendering: crisp-edges;
+        }
+
+        .qr-link {
+            font-size: 9pt;
+            color: var(--accent);
+            text-decoration: underline;
+            word-break: break-all;
+        }
+
+        .qr-link:hover {
+            color: #8a3f08;
         }
 
         .qr-info {
@@ -563,6 +577,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             <div class="bottom-verification">
                 <div class="qr-area">
                     <img src="<?php echo $qr_api_url; ?>" alt="QR Verification" class="qr-image" onerror="this.src='<?php echo $qr_fallback; ?>'">
+                    <a class="qr-link" href="<?php echo $verify_url; ?>" target="_blank" rel="noopener">Abrir verificacion en el navegador</a>
                     <div class="qr-info">
                         <div style="font-weight: 800; letter-spacing: 1px;">FOLIO DE VERIFICACIÓN: <?php echo $folio; ?></div>
                         <div><?php echo $es_docente ? 'Docente' : 'Estudiante'; ?>: <strong><?php echo strtoupper($user_nombre); ?></strong></div>
@@ -571,7 +586,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
                         <?php if (!$es_docente): ?>
                             <div>Desempeño promedio: <strong><?php echo $promedio_estudiante; ?></strong> / 5.0</div>
                         <?php endif; ?>
-                        <div style="font-size: 7.5pt; color: var(--secondary);">Escanea para validar en línea y ver registro oficial.</div>
+                        <div style="font-size: 7.5pt; color: var(--secondary);">Escanea o visita: <?php echo htmlspecialchars($verify_url); ?></div>
                     </div>
                 </div>
 
