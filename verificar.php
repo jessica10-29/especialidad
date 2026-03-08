@@ -20,7 +20,7 @@ if (!empty($folio) && strpos($folio, 'UC-') === 0) {
 
         if ($res->num_rows > 0) {
             $usuario = $res->fetch_assoc();
-            if ($usuario['rol'] === 'estudiante') {
+            if ($usuario['rol'] === 'estudiante' || $usuario['rol'] === 'profesor') {
                 $valido = true;
             }
         }
@@ -204,24 +204,24 @@ if (!empty($folio) && strpos($folio, 'UC-') === 0) {
             <h1>Documento Válido</h1>
             <p class="subtitle">Este certificado ha sido emitido y verificado por Unicali Segura.</p>
 
-            <div class="info-box">
-                <div class="info-row">
-                    <span class="label">Estudiante</span>
-                    <span class="value"><?php echo htmlspecialchars($usuario['nombre']); ?></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Folio</span>
-                    <span class="value"><?php echo htmlspecialchars($folio); ?></span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Estado Académico</span>
-                    <span class="value" style="color: var(--success);">Inscrito / Activo</span>
-                </div>
-                <div class="info-row">
-                    <span class="label">Fecha Emisión</span>
-                    <span class="value"><?php echo date('d M, Y'); ?></span>
-                </div>
-            </div>
+           <div class="info-box">
+    <div class="info-row">
+        <span class="label"><?php echo ($usuario['rol'] === 'profesor') ? 'Docente' : 'Estudiante'; ?></span>
+        <span class="value"><?php echo htmlspecialchars($usuario['nombre']); ?></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Folio</span>
+        <span class="value"><?php echo htmlspecialchars($folio); ?></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Estado Institucional</span>
+        <span class="value" style="color: var(--success);">Verificado / Activo</span>
+    </div>
+    <div class="info-row">
+        <span class="label">Fecha Verificación</span>
+        <span class="value"><?php echo date('d M, Y'); ?></span>
+    </div>
+</div>
         <?php else: ?>
             <div class="status-icon icon-danger">
                 <i class="fa-solid fa-triangle-exclamation"></i>

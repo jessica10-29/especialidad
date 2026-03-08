@@ -33,21 +33,34 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
         }
 
         $nombre_archivo = 'entrega_' . $actividad_id . '_' . $estudiante_id . '_' . time() . '.' . $ext;
-        
-        if (move_uploaded_file($_FILES['archivo']['tmp_name'], $destino_dir . '/' . $nombre_archivo)) {
-            $stmt = $conn->prepare("INSERT INTO entregas (actividad_id, estudiante_id, archivo, comentario) VALUES (?, ?, ?, ?) ON DUPLICATE KEY UPDATE archivo = VALUES(archivo), comentario = VALUES(comentario), fecha_entrega = CURRENT_TIMESTAMP");
-            $stmt->bind_param("iiss", $actividad_id, $estudiante_id, $nombre_archivo, $comentario);
-            
-            if ($stmt->execute()) {
-                header("Location: ver_notas.php?materia=" . urlencode($materia_nombre) . "&status=success");
-            } else {
-                echo "Error al guardar en base de datos: " . $conn->error;
-            }
-        } else {
-            echo "Error al mover el archivo al servidor.";
-        }
+     
+       // ... (tu código anterior igual hasta move_uploaded_file)
+
+if (move_uploaded_file($_FILES['archivo']['tmp_name'], $destino_dir . '/' . $nombre_archivo)) {
+    // El prepare fallaba porque la tabla no existía o las columnas no coincidían
+    $stmt = $conn->prepare("INSERT INTO entregas (actividad_id, estudiante_id, archivo, comentario) 
+                            VALUES (?, ?, ?, ?) 
+                            ON DUPLICATE KEY UPDATE 
+                            archivo= VALUES(archivo), 
+                            comentario = VALUES(comentario), 
+                            fecha_entrega = CURRENT_TIMESTAMP");
+    
+    if (!$stmt) {
+        die("Error en la base de datos: " . $conn->error);
+    }
+
+    $stmt->bind_param("iiss", $actividad_id, $estudiante_id, $nombre_archivo, $comentario);
+    
+    if ($stmt->execute()) {
+        header("Location: ver_notas.php?materia=" . urlencode($materia_nombre) . "&status=success");
+        exit(); // IMPORTANTE: detiene la ejecución después de redirigir
     } else {
-        echo "Error en la subida del archivo.";
+        echo "Error al ejecutar: " . $stmt->error;
+    }
+  } else {
+    echo "Error al mover el archivo. Revisa los permisos de la carpeta 'uploads/entregas'.";
+  }
+
     }
 }
 ?>

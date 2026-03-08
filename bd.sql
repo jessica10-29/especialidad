@@ -133,3 +133,25 @@ CREATE TABLE IF NOT EXISTS password_resets (
     , INDEX (email)
 );
 
+
+CREATE TABLE IF NOT EXISTS actividades (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    materia_id INT NOT NULL,
+    titulo VARCHAR(255) NOT NULL,
+    descripcion TEXT,
+    fecha_limite DATETIME NOT NULL,
+    created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (materia_id) REFERENCES materias(id) ON DELETE CASCADE
+);
+
+CREATE TABLE entregas (
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    actividad_id INT NOT NULL,
+    estudiante_id INT NOT NULL,
+    archivo VARCHAR(255) NOT NULL, -- Nombre exacto que usas en PHP
+    comentario TEXT NULL,           -- Columna para los comentarios
+    fecha_entrega TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE KEY entrega_unica (actividad_id, estudiante_id), -- Evita duplicados
+    FOREIGN KEY (actividad_id) REFERENCES actividades(id) ON DELETE CASCADE,
+    FOREIGN KEY (estudiante_id) REFERENCES usuarios(id) ON DELETE CASCADE
+);
