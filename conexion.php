@@ -8,7 +8,9 @@ if (!headers_sent()) {
 
 // Detectar si estamos en localhost para no forzar HTTPS en desarrollo
 $hostActual  = $_SERVER['HTTP_HOST'] ?? '';
-$isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1;
+// Considera local también redes privadas (LAN) para no forzar HTTPS cuando no hay certificado
+$isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1
+    || preg_match('/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/', $hostActual) === 1;
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 // Forzar HTTPS: siempre en hosting; en localhost solo si FORZAR_HTTPS=1

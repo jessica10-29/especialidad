@@ -68,15 +68,86 @@ if ($q_prom && ($pr = $q_prom->fetch_assoc()) && $pr['prom'] !== null) {
     $promedio_estudiante = number_format((float)$pr['prom'], 2);
 }
 
-// Generar URL de Verificación
-$protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-$host = $_SERVER['HTTP_HOST'];
-$dir = rtrim(dirname($_SERVER['SCRIPT_NAME']), '/\\');
-$base_path = $dir === '/' ? '' : $dir;
-$verify_url = "{$protocol}://{$host}{$base_path}/verificar.php?folio=" . rawurlencode($folio);
+// Generar URL de Verificación robusta (evita barras invertidas, usa IP LAN si es localhost)
+$forward_proto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+$protocol = $forward_proto ? (($forward_proto === 'https') ? 'https' : 'http') : ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http");
+
+$app_url = rtrim(getenv('APP_URL') ?: getenv('PUBLIC_BASE_URL') ?: '', '/');
+
+$host = $_SERVER['HTTP_HOST'] ?? '';
+// Si no hay host, intenta con SERVER_ADDR o hostname
+if ($host === '') {
+    if (!empty($_SERVER['SERVER_ADDR'])) {
+        $host = $_SERVER['SERVER_ADDR'];
+    } else {
+        $host = gethostbyname(gethostname());
+    }
+}
+
+// Normalizar puerto
+$port = '';
+if (strpos($host, ':') !== false) {
+    [$hostOnly, $portPart] = explode(':', $host, 2);
+    $host = $hostOnly;
+    $port = ':' . $portPart;
+} elseif (isset($_SERVER['SERVER_PORT']) && !in_array((string)$_SERVER['SERVER_PORT'], ['80', '443'])) {
+    $port = ':' . $_SERVER['SERVER_PORT'];
+}
+
+// Si es localhost/127 o ::1, usa IP LAN para que funcione en móvil
+if (!$app_url && preg_match('/^(localhost|127\\.0\\.0\\.1|::1)$/', $host) && !empty($_SERVER['SERVER_ADDR'])) {
+    $host = $_SERVER['SERVER_ADDR'];
+}
+
+// Fuerza http en redes privadas si no hay APP_URL (evita bloqueos por https sin cert)
+if (!$app_url && preg_match('/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/', $host)) {
+    $protocol = 'http';
+}
+
+$script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+$script_dir = ($script_dir === '/' ? '' : $script_dir);
+
+$base_url = $app_url ?: "{$protocol}://{$host}{$port}{$script_dir}";
+$verify_url = rtrim($base_url, '/') . "/verificar.php?folio=" . rawurlencode($folio);
 // Proveedor principal (qrserver) y fallback a Google Charts si falla la carga
 $qr_api_url = "https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=" . urlencode($verify_url);
 $qr_fallback = "https://chart.googleapis.com/chart?chs=170x170&cht=qr&chl=" . urlencode($verify_url) . "&choe=UTF-8";
+
+// ===== Generar y servir archivo QR local para impresión =====
+$qr_dir = __DIR__ . '/uploads/qr';
+if (!is_dir($qr_dir)) {
+    @mkdir($qr_dir, 0755, true);
+}
+$qr_filename = $folio . '.png';
+$qr_local_path = $qr_dir . '/' . $qr_filename;
+$qr_public_path = '/uploads/qr/' . $qr_filename;
+$qr_src = $qr_fallback; // fallback por defecto
+$qr_data_uri = null;
+$qr_binary = null;
+
+// Intentar generar un QR fresco (evita cache con URL antigua)
+$qr_sources = [$qr_api_url, $qr_fallback];
+foreach ($qr_sources as $srcTry) {
+    $context = stream_context_create(['http' => ['timeout' => 4], 'https' => ['timeout' => 4]]);
+    $qr_binary = @file_get_contents($srcTry, false, $context);
+    if ($qr_binary !== false && strlen($qr_binary) > 0) {
+        @file_put_contents($qr_local_path, $qr_binary); // actualiza archivo local
+        break;
+    }
+}
+
+// Si no se pudo descargar, usar archivo previo si existe
+if (($qr_binary === false || $qr_binary === null) && file_exists($qr_local_path)) {
+    $qr_binary = @file_get_contents($qr_local_path);
+}
+
+// Si tenemos binario, usar data URI (ideal para impresión y escaneo)
+if ($qr_binary !== false && $qr_binary !== null) {
+    $qr_data_uri = 'data:image/png;base64,' . base64_encode($qr_binary);
+    $qr_src = $qr_data_uri;
+} elseif (file_exists($qr_local_path)) {
+    $qr_src = $qr_public_path . '?v=' . filemtime($qr_local_path);
+}
 
 // Código de barras con datos esenciales del estudiante
 $barcode_data = "UNICALI|ID:{$user_id}|NOMBRE:{$user['nombre']}|DOC:{$user['identificacion']}|COD:{$user['codigo_estudiantil']}|PROG:{$user['programa_academico']}";
@@ -100,7 +171,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         @page {
-            size: letter;
+            size: letter portrait;
             margin: 0;
         }
 
@@ -120,15 +191,21 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         .certificate-container {
             width: 215.9mm;
-            height: 279.4mm;
+            max-width: 215.9mm;
+            min-height: 250mm;
+            max-height: 270mm;
+            height: auto;
             margin: 0 auto;
             position: relative;
             background: var(--bg-white);
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            padding: 1.8cm 2cm 1.6cm 2cm;
+            /* padding ajustado para que todo quepa en una hoja */
+            padding: 1.1cm 1.4cm 1.0cm 1.4cm;
             overflow: hidden;
+            page-break-inside: avoid;
+            page-break-after: avoid;
         }
 
         /* 🏆 BORDE DE LUJO */
@@ -214,14 +291,14 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             display: flex;
             flex-direction: column;
             text-align: center;
-            max-width: 170mm;
+            max-width: 145mm;
             width: 100%;
             margin: 0 auto;
-            padding: 0 0.4cm;
+            padding: 0.12cm 0.30cm 0.4cm;
         }
 
         .header {
-            margin-bottom: 20px;
+            margin-bottom: 12px;
             /* Reducido de 30px */
         }
 
@@ -246,11 +323,9 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         .doc-title {
             font-family: 'Playfair Display', serif;
-            font-size: 24pt;
-            /* Reducido de 28pt */
+            font-size: 20pt;
             color: var(--primary);
-            margin: 15px 0;
-            /* Reducido */
+            margin: 10px 0;
             font-style: italic;
             position: relative;
             display: inline-block;
@@ -268,10 +343,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         .body-text {
             text-align: justify;
-            font-size: 13pt;
-            line-height: 1.65;
-            padding: 0 0.35cm;
-            margin-bottom: 12px;
+            font-size: 11.5pt;
+            line-height: 1.4;
+            padding: 0 0.32cm;
+            margin-bottom: 6px;
             flex-grow: 1;
         }
 
@@ -281,9 +356,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .date-location {
-            font-size: 11pt;
-            margin-bottom: 30px;
-            /* Reducido significativamente */
+            font-size: 10.8pt;
+            margin-bottom: 14px;
             font-style: italic;
         }
 
@@ -291,16 +365,13 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            margin-bottom: 30px;
-            /* Reducido */
-            gap: 100px;
-            /* Reducido */
+            margin-bottom: 12px;
+            gap: 60px;
             z-index: 10;
         }
 
         .signature-block {
-            width: 220px;
-            /* Reducido */
+            width: 180px;
             text-align: center;
         }
 
@@ -329,10 +400,14 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             flex-direction: column;
             justify-content: center;
             align-items: center;
-            gap: 12px;
-            padding: 0 0.3cm;
-            margin-top: 4px;
-            margin-bottom: 6px;
+            gap: 6px;
+            padding: 0 0.4cm;
+            margin-top: 2px;
+            margin-bottom: 2px;
+            max-width: 140mm;
+            width: 100%;
+            margin-left: auto;
+            margin-right: auto;
         }
 
         .qr-area {
@@ -341,9 +416,9 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             flex-direction: column;
             align-items: center;
             justify-content: center;
-            gap: 8px;
+            gap: 6px;
             width: 100%;
-            max-width: 520px;
+            max-width: 140mm;
         }
 
         .barcode-area {
@@ -366,8 +441,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .qr-image {
-            width: 170px;
-            height: 170px;
+            width: 140px;
+            height: 140px;
             border: 1.5px solid var(--accent);
             padding: 5px;
             background: white;
@@ -387,10 +462,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .qr-info {
-            font-size: 8.4pt;
+            font-size: 7.8pt;
             color: var(--primary);
-            line-height: 1.45;
-            max-width: 500px;
+            line-height: 1.35;
+            max-width: 125mm;
             word-wrap: break-word;
             word-break: break-word;
             text-align: center;
@@ -430,81 +505,59 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             font-size: 8pt;
             color: var(--secondary);
             border-top: 1px solid #eee;
-            padding-top: 15px;
-            margin-top: 20px;
+            padding-top: 6px;
+            margin-top: 6px;
         }
 
         @media print {
+            html, body {
+                width: 215.9mm;
+                height: auto;
+                margin: 0 auto;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
+                font-size: 10.5pt;
+            }
+
             body {
                 background: white;
+                margin: 0;
             }
 
             .certificate-container {
                 margin: 0;
                 box-shadow: none;
+                width: 210mm;
+                height: auto;
+                min-height: 250mm;
+                max-height: 270mm;
+                overflow: hidden;
+                page-break-inside: avoid;
+                page-break-after: avoid;
             }
 
             .no-print {
                 display: none;
             }
+
+            .content,
+            .bottom-verification {
+                page-break-inside: avoid;
+            }
+
+            * {
+                page-break-inside: avoid;
+            }
         }
 
-        /* UI CONTROLS */
+        /* UI CONTROLS (ocultos) */
         .no-print {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1000;
-            background: white;
-            padding: 15px;
-            border-radius: 12px;
-            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
-            display: flex;
-            gap: 10px;
-        }
-
-        .btn {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-        }
-
-        .btn-print {
-            background: var(--primary);
-            color: white;
-        }
-
-        .btn-close {
-            background: #f1f5f9;
-            color: var(--secondary);
-        }
-
-        .btn:hover {
-            opacity: 0.9;
-            transform: translateY(-1px);
+            display: none !important;
         }
     </style>
 </head>
 
 <body>
-    <div class="no-print">
-        <button class="btn btn-print" onclick="window.print()">
-            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2" />
-                <path d="M6 14h12v8H6z" />
-            </svg>
-            Imprimir Certificado
-        </button>
-        <button class="btn btn-close" onclick="window.close()">Cerrar</button>
-    </div>
-
     <div class="certificate-container">
         <div class="outer-border"></div>
         <div class="inner-border"></div>
@@ -576,8 +629,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
             <div class="bottom-verification">
                 <div class="qr-area">
-                    <img src="<?php echo $qr_api_url; ?>" alt="QR Verification" class="qr-image" onerror="this.src='<?php echo $qr_fallback; ?>'">
-                    <a class="qr-link" href="<?php echo $verify_url; ?>" target="_blank" rel="noopener">Abrir verificacion en el navegador</a>
+                    <img src="<?php echo $qr_src; ?>" alt="QR Verification" class="qr-image" onerror="this.src='<?php echo $qr_fallback; ?>'">
+                    
                     <div class="qr-info">
                         <div style="font-weight: 800; letter-spacing: 1px;">FOLIO DE VERIFICACIÓN: <?php echo $folio; ?></div>
                         <div><?php echo $es_docente ? 'Docente' : 'Estudiante'; ?>: <strong><?php echo strtoupper($user_nombre); ?></strong></div>
@@ -586,7 +639,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
                         <?php if (!$es_docente): ?>
                             <div>Desempeño promedio: <strong><?php echo $promedio_estudiante; ?></strong> / 5.0</div>
                         <?php endif; ?>
-                        <div style="font-size: 7.5pt; color: var(--secondary);">Escanea o visita: <?php echo htmlspecialchars($verify_url); ?></div>
+                        <div style="font-size: 7.5pt; color: var(--secondary);">Escanea el c\u00f3digo para validar en l\u00ednea.</div>
                     </div>
                 </div>
 
