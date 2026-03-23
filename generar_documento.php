@@ -135,7 +135,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         @page {
             size: letter portrait;
-            margin: 0;
+            margin: 10mm;
         }
 
         * {
@@ -153,10 +153,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .certificate-container {
-            width: 215.9mm;
-            max-width: 215.9mm;
-            min-height: 250mm;
-            max-height: 270mm;
+            width: 182mm;
+            max-width: 182mm;
+            min-height: 230mm;
+            max-height: 255mm;
             height: auto;
             margin: 0 auto;
             position: relative;
@@ -164,8 +164,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            /* padding ajustado para que todo quepa en una hoja */
-            padding: 1.1cm 1.4cm 1.0cm 1.4cm;
+            padding: 9mm 10mm 9mm 10mm;
             overflow: hidden;
             page-break-inside: avoid;
             page-break-after: avoid;
@@ -238,8 +237,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%) rotate(-30deg);
-            font-size: 140pt;
-            /* Reducido un poco */
+            font-size: 120pt;
             color: rgba(0, 0, 0, 0.03);
             font-family: 'Playfair Display', serif;
             pointer-events: none;
@@ -254,21 +252,19 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             display: flex;
             flex-direction: column;
             text-align: center;
-            max-width: 145mm;
+            max-width: 142mm;
             width: 100%;
             margin: 0 auto;
-            padding: 0.12cm 0.30cm 0.4cm;
+            padding: 0.10cm 0.26cm 0.35cm;
         }
 
         .header {
-            margin-bottom: 12px;
-            /* Reducido de 30px */
+            margin-bottom: 8px;
         }
 
         .university-name {
             font-family: 'Playfair Display', serif;
-            font-size: 28pt;
-            /* Reducido de 32pt */
+            font-size: 26pt;
             font-weight: 700;
             letter-spacing: 2px;
             color: var(--primary);
@@ -286,9 +282,9 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         .doc-title {
             font-family: 'Playfair Display', serif;
-            font-size: 20pt;
+            font-size: 19pt;
             color: var(--primary);
-            margin: 10px 0;
+            margin: 8px 0;
             font-style: italic;
             position: relative;
             display: inline-block;
@@ -306,9 +302,9 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         .body-text {
             text-align: justify;
-            font-size: 11.5pt;
-            line-height: 1.4;
-            padding: 0 0.32cm;
+            font-size: 11pt;
+            line-height: 1.35;
+            padding: 0 0.26cm;
             margin-bottom: 6px;
             flex-grow: 1;
         }
@@ -328,8 +324,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             display: flex;
             justify-content: center;
             align-items: flex-end;
-            margin-bottom: 12px;
-            gap: 60px;
+            margin-bottom: 8px;
+            gap: 32px;
             z-index: 10;
         }
 
@@ -345,8 +341,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         .sig-name {
             font-weight: 700;
-            font-size: 10.5pt;
-            /* Reducido */
+            font-size: 10pt;
             text-transform: uppercase;
             white-space: nowrap;
         }
@@ -364,9 +359,9 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             justify-content: center;
             align-items: center;
             gap: 6px;
-            padding: 0 0.4cm;
+            padding: 0 0.3cm;
             margin-top: 2px;
-            margin-bottom: 2px;
+            margin-bottom: 4px;
             max-width: 140mm;
             width: 100%;
             margin-left: auto;
@@ -404,10 +399,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .qr-image {
-            width: 140px;
-            height: 140px;
+            width: 118px;
+            height: 118px;
             border: 1.5px solid var(--accent);
-            padding: 5px;
+            padding: 4px;
             background: white;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             image-rendering: crisp-edges;
@@ -424,6 +419,11 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             color: #8a3f08;
         }
 
+        img {
+            page-break-inside: avoid;
+            break-inside: avoid;
+        }
+
         .qr-info {
             font-size: 7.8pt;
             color: var(--primary);
@@ -435,10 +435,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .digital-seal {
-            width: 100px;
-            /* Reducido */
-            height: 100px;
-            /* Reducido */
+            width: 90px;
+            height: 90px;
             border: 4px double var(--accent);
             border-radius: 50%;
             display: flex;
@@ -465,57 +463,81 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .footer {
-            font-size: 8pt;
+            font-size: 7.6pt;
             color: var(--secondary);
             border-top: 1px solid #eee;
-            padding-top: 6px;
-            margin-top: 6px;
+            padding-top: 4px;
+            margin-top: 3px;
         }
 
         @media print {
             html, body {
                 width: 215.9mm;
-                height: auto;
+                height: 279.4mm;
                 margin: 0 auto;
                 -webkit-print-color-adjust: exact;
                 print-color-adjust: exact;
-                font-size: 10.5pt;
+                font-size: 10.1pt;
+                background: white;
             }
 
             body {
                 background: white;
                 margin: 0;
+                padding: 0;
             }
 
             .certificate-container {
-                margin: 0;
+                margin: 0 auto;
                 box-shadow: none;
-                width: 210mm;
+                width: 182mm;
                 height: auto;
-                min-height: 250mm;
-                max-height: 270mm;
+                min-height: 230mm;
+                max-height: 255mm;
                 overflow: hidden;
-                page-break-inside: avoid;
-                page-break-after: avoid;
+                break-inside: avoid-page;
+                break-before: avoid-page;
+                break-after: avoid-page;
+                transform: scale(0.985);
+                transform-origin: top center;
             }
 
             .no-print {
                 display: none;
             }
 
-            .content,
-            .bottom-verification {
-                page-break-inside: avoid;
-            }
-
-            * {
-                page-break-inside: avoid;
+            .print-actions {
+                display: none !important;
             }
         }
 
-        /* UI CONTROLS (ocultos) */
-        .no-print {
-            display: none !important;
+        /* Botón flotante de impresión/guardar */
+        .print-fab {
+            position: fixed;
+            right: 18px;
+            bottom: 18px;
+            background: var(--primary);
+            color: #fff;
+            border: none;
+            padding: 12px 16px;
+            border-radius: 999px;
+            font-weight: 700;
+            cursor: pointer;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.18);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            z-index: 999;
+        }
+
+        .print-fab:hover {
+            background: #0f172a;
+        }
+
+        @media print {
+            .print-fab {
+                display: none;
+            }
         }
     </style>
 </head>
@@ -621,6 +643,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             </div>
         </div>
     </div>
+
+    <button class="print-fab" onclick="window.print()">
+        <span style="font-size:14px;">🖨️</span> Imprimir / Guardar PDF
+    </button>
 </body>
 
 </html>

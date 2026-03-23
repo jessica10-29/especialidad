@@ -140,11 +140,18 @@ if (!$res) {
             box-sizing: border-box;
         }
 
+        @page {
+            size: A4 portrait;
+            margin: 14mm 15mm 16mm 15mm;
+        }
+
         body {
             background-color: #f1f5f9;
             color: var(--text-main);
             padding: 40px 20px;
             font-family: 'EB Garamond', serif;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
         }
 
         /* --- UI Controls --- */
@@ -189,14 +196,14 @@ if (!$res) {
             max-width: 900px;
             margin: 0 auto;
             background: var(--bg-report);
-            padding: 60px 80px;
+            padding: 48px 58px;
             position: relative;
-            box-shadow: 0 0 40px rgba(0, 0, 0, 0.1);
+            box-shadow: 0 0 24px rgba(0, 0, 0, 0.08);
             overflow: hidden;
             display: flex;
             flex-direction: column;
-            border: 15px solid transparent;
-            border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="%23d4af37" stroke-width="2"/></svg>') 15 stretch;
+            border: 12px solid transparent;
+            border-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" viewBox="0 0 100 100"><path d="M0,0 L100,0 L100,100 L0,100 Z" fill="none" stroke="%23d4af37" stroke-width="2"/></svg>') 12 stretch;
         }
 
         /* Watermark */
@@ -281,6 +288,7 @@ if (!$res) {
             margin-bottom: 50px;
             position: relative;
             z-index: 1;
+            page-break-inside: avoid;
         }
 
         th {
@@ -297,6 +305,7 @@ if (!$res) {
             padding: 15px;
             border: 1px solid #e2e8f0;
             font-size: 16px;
+            page-break-inside: avoid;
         }
 
         .grade-val {
@@ -367,21 +376,41 @@ if (!$res) {
         }
 
         @media print {
-            body {
+            html, body {
+                width: 210mm;
+                min-height: 297mm;
+                margin: 0;
                 background: white;
                 padding: 0;
+                -webkit-print-color-adjust: exact;
+                print-color-adjust: exact;
             }
 
             .controls {
-                display: none;
+                display: none !important;
+            }
+
+            .pdf-viewport {
+                padding: 0;
             }
 
             .page {
                 box-shadow: none;
-                border: 15px solid #d4af37 !important;
+                border: 12px solid #d4af37 !important;
+                width: auto;
+                min-height: 100%;
                 margin: 0;
-                width: 100%;
+                padding: 32px 40px;
+                page-break-after: always;
             }
+
+            /* Evita cortes de tablas y bloques clave */
+            .page, .info-grid, table, .footer-area, .qr-section-container {
+                page-break-inside: avoid;
+            }
+
+            thead { display: table-header-group; }
+            tr    { page-break-inside: avoid; page-break-after: auto; }
         }
     </style>
 </head>

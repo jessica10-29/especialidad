@@ -125,10 +125,10 @@ if ($rol == 'profesor' && (empty($u['codigo_profesor']) || $u['codigo_profesor']
                 <h3 style="color: white; margin-top: 10px;">Unicali<span style="color: var(--primary);"><?php echo $rol == 'profesor' ? 'Docente' : 'Estudiante'; ?></span></h3>
             </div>
             <nav>
-                <a href="<?php echo $rol == 'profesor' ? 'dashboard_profesor.php' : 'dashboard_estudiante.php'; ?>" class="nav-link">
-                    <i class="fa-solid fa-house"></i> Inicio
-                </a>
                 <?php if ($rol == 'profesor'): ?>
+                    <a href="dashboard_profesor.php" class="nav-link">
+                        <i class="fa-solid fa-house"></i> Inicio
+                    </a>
                     <a href="gestion_materias.php" class="nav-link">
                         <i class="fa-solid fa-book"></i> Mis Materias
                     </a>

@@ -22,6 +22,50 @@ $sql = "SELECT m.nombre, m.codigo,
         WHERE mat.estudiante_id = $estudiante_id";
 
 $res = $conn->query($sql);
+
+// Promedio evolutivo por periodo academico (ponderado por corte)
+// Usa LEFT JOIN para no perder matrículas sin periodo asignado
+$sql_periodos = "SELECT 
+    COALESCE(p.nombre, 'Sin periodo asignado') AS periodo,
+    COALESCE(p.fecha_inicio, '1900-01-01') AS fecha_inicio,
+    ROUND(AVG(COALESCE(mp.promedio,0)),2) AS promedio_periodo,
+    COUNT(*) AS cursos
+FROM (
+    SELECT mat.id AS matricula_id, mat.periodo_id,
+           SUM(COALESCE(n.valor,0) * CASE
+                WHEN n.corte='Corte 1' THEN 0.2
+                WHEN n.corte='Corte 2' THEN 0.2
+                WHEN n.corte='Corte 3' THEN 0.2
+                WHEN n.corte='Examen Final' THEN 0.3
+                WHEN n.corte='Seguimiento' THEN 0.1
+                ELSE 0 END) AS promedio
+    FROM matriculas mat
+    LEFT JOIN notas n ON n.matricula_id = mat.id
+    WHERE mat.estudiante_id = $estudiante_id
+    GROUP BY mat.id, mat.periodo_id
+) mp
+LEFT JOIN periodos p ON p.id = mp.periodo_id
+GROUP BY p.id, p.nombre, p.fecha_inicio
+ORDER BY COALESCE(p.fecha_inicio, '1900-01-01') ASC";
+
+$res_periodos = $conn->query($sql_periodos);
+$periodo_labels = [];
+$periodo_data = [];
+$periodo_cursos = [];
+$hay_periodos = false;
+if ($res_periodos && $res_periodos->num_rows > 0) {
+    while ($row = $res_periodos->fetch_assoc()) {
+        $periodo_labels[] = $row['periodo'];
+        $periodo_data[] = (float)$row['promedio_periodo'];
+        $periodo_cursos[] = (int)$row['cursos'];
+        $hay_periodos = true;
+    }
+} else {
+    // Fallback para mostrar mensaje en la grÃ¡fica
+    $periodo_labels = ['Sin datos'];
+    $periodo_data = [0];
+    $periodo_cursos = [0];
+}
 ?>
 <!DOCTYPE html>
 <html lang="es">
@@ -89,7 +133,7 @@ $res = $conn->query($sql);
 
             <!-- Gráfico de Evolución (Trello) -->
             <div class="card glass-panel fade-in" style="margin-bottom: 30px; padding: 25px;">
-                <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Evolución de Promedio</h3>
+                <h3 style="margin-bottom: 20px;"><i class="fa-solid fa-chart-line" style="color: var(--primary);"></i> Evolución por Período</h3>
                 <div style="height: 300px;">
                     <canvas id="progresoChart"></canvas>
                 </div>
@@ -143,66 +187,107 @@ $res = $conn->query($sql);
         </main>
     </div>
     <script>
-        const ctx = document.getElementById('progresoChart').getContext('2d');
+        (async function () {
+            const labels = <?php echo json_encode($periodo_labels); ?>;
+            const data = <?php echo json_encode($periodo_data); ?>;
+            const cursos = <?php echo json_encode($periodo_cursos); ?>;
+            const hasData = <?php echo $hay_periodos ? 'true' : 'false'; ?>;
 
-        <?php
-        $labels = [];
-        $data = [];
-        $res->data_seek(0);
-        while ($row = $res->fetch_assoc()) {
-            $labels[] = $row['nombre'];
-            $data[] = number_format((float)$row['promedio'], 1);
-        }
-        ?>
+            const container = document.getElementById('progresoChart').parentElement;
+            const canvas = document.getElementById('progresoChart');
 
-        new Chart(ctx, {
-            type: 'line',
-            data: {
-                labels: <?php echo json_encode($labels); ?>,
-                datasets: [{
-                    label: 'Promedio por Materia',
-                    data: <?php echo json_encode($data); ?>,
-                    borderColor: '#6366f1',
-                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
-                    borderWidth: 3,
-                    tension: 0.4,
-                    fill: true,
-                    pointBackgroundColor: '#fff',
-                    pointBorderColor: '#6366f1',
-                    pointRadius: 6,
-                    pointHoverRadius: 8
-                }]
-            },
-            options: {
-                responsive: true,
-                maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        display: false
+            // Cargar Chart.js con doble CDN de respaldo
+            async function ensureChart() {
+                if (typeof Chart !== 'undefined') return;
+                const urls = [
+                    'https://cdn.jsdelivr.net/npm/chart.js',
+                    'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.min.js'
+                ];
+                for (const url of urls) {
+                    try {
+                        await new Promise((resolve, reject) => {
+                            const s = document.createElement('script');
+                            s.src = url;
+                            s.onload = () => resolve();
+                            s.onerror = () => reject();
+                            document.head.appendChild(s);
+                        });
+                        if (typeof Chart !== 'undefined') return;
+                    } catch (e) {
+                        continue;
                     }
+                }
+                throw new Error('Chart.js no disponible');
+            }
+
+            try {
+                await ensureChart();
+            } catch (err) {
+                const msg = document.createElement('div');
+                msg.style.cssText = "color:#94a3b8;font-weight:600;text-align:center;padding:20px;";
+                msg.textContent = "No se pudo cargar el gráfico (Chart.js no disponible). Revisa la conexión o habilita el CDN.";
+                container.appendChild(msg);
+                console.error(err);
+                return;
+            }
+
+            if (!hasData || !labels.length) {
+                const msg = document.createElement('div');
+                msg.style.cssText = "color:#94a3b8;font-weight:600;text-align:center;padding:12px;";
+                msg.textContent = "Sin datos de periodos. Asigna periodo a tus matrículas o registra notas.";
+                container.appendChild(msg);
+            }
+
+            const ctx = canvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: labels.length ? labels : ['Sin datos'],
+                    datasets: [{
+                        label: 'Promedio por periodo',
+                        data: data.length ? data : [0],
+                        borderColor: '#34d399',
+                        backgroundColor: 'rgba(52, 211, 153, 0.12)',
+                        borderWidth: 3,
+                        tension: 0.35,
+                        fill: true,
+                        pointBackgroundColor: '#0f172a',
+                        pointBorderColor: '#34d399',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
                 },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        max: 5,
-                        grid: {
-                            color: 'rgba(255,255,255,0.05)'
-                        },
-                        ticks: {
-                            color: '#94a3b8'
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: { display: false },
+                        tooltip: {
+                            callbacks: {
+                                afterLabel: function (context) {
+                                    return 'Cursos en periodo: ' + (cursos[context.dataIndex] || 0);
+                                }
+                            }
                         }
                     },
-                    x: {
-                        grid: {
-                            display: false
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            suggestedMax: 5,
+                            max: 5,
+                            grid: { color: 'rgba(255,255,255,0.05)' },
+                            ticks: { color: '#94a3b8' }
                         },
-                        ticks: {
-                            color: '#94a3b8'
+                        x: {
+                            grid: { display: false },
+                            ticks: { color: '#94a3b8' }
                         }
                     }
                 }
-            }
-        });
+            });
+
+            console.debug('Periodos labels/data:', labels, data, 'cursos:', cursos);
+        })();
     </script>
 </body>
 
