@@ -2,6 +2,14 @@
 // debug_login.php
 require_once 'conexion.php';
 
+// Restringir a entorno local o CLI para no exponer hashes en produccion
+$ip = $_SERVER['REMOTE_ADDR'] ?? '';
+$esLocal = in_array($ip, ['127.0.0.1', '::1']) || preg_match('/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/', $ip);
+if (getenv('APP_ENV') !== 'local' && !$esLocal && PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Debug de usuarios deshabilitado en produccion.');
+}
+
 echo "<h1>🔍 Debug de Usuarios</h1>";
 
 $res = $conn->query("SELECT id, nombre, email, identificacion, rol, password FROM usuarios");

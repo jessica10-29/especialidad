@@ -1,59 +1,58 @@
 <?php
-// probador_completo.php - Prueba exhaustiva de puertos SMTP
-require_once 'PHPMailer/Exception.php';
-require_once 'PHPMailer/PHPMailer.php';
-require_once 'PHPMailer/SMTP.php';
+// probador_completo.php
+// Prueba de envío SMTP usando la configuración real (sin credenciales hardcodeadas).
+// Bloqueado en producción para evitar exposición.
 
-use PHPMailer\PHPMailer\PHPMailer;
-use PHPMailer\PHPMailer\Exception;
+require_once __DIR__ . '/config_mail.php';
 
-$user = 'plataforma.unicali@gmail.com';
-$pass = 'llhueuzspoktpzol';
-
-echo "<h2>Probador de Puertos Gmail</h2>";
-
-function probar($port, $secure, $desc)
-{
-    global $user, $pass;
-    echo "<h3>Probando: $desc (Puerto $port)...</h3>";
-
-    $mail = new PHPMailer(true);
-    try {
-        $mail->isSMTP();
-        $mail->Host = 'smtp.gmail.com';
-        $mail->SMTPAuth = true;
-        $mail->Username = $user;
-        $mail->Password = $pass;
-        $mail->SMTPSecure = $secure;
-        $mail->Port = $port;
-        $mail->Timeout = 10;
-
-        $mail->setFrom($user, 'Test');
-        $mail->addAddress($user);
-        $mail->Subject = "Prueba Puerto $port";
-        $mail->Body = "Prueba exitosa en puerto $port";
-
-        if ($mail->send()) {
-            echo "<b style='color:green;'>✅ ÉXITO en puerto $port!</b><br>";
-            return true;
-        }
-    } catch (Exception $e) {
-        echo "<span style='color:red;'>❌ FALLÓ: " . $mail->ErrorInfo . "</span><br>";
+if (!function_exists('str_starts_with')) {
+    function str_starts_with($haystack, $needle) {
+        return $needle === '' || strpos($haystack, $needle) === 0;
     }
-    return false;
 }
 
-$ok587 = probar(587, PHPMailer::ENCRYPTION_STARTTLS, "STARTTLS");
+// Restringir a entorno local
+$ip = $_SERVER['REMOTE_ADDR'] ?? '';
+$esLocalIp = in_array($ip, ['127.0.0.1', '::1']) || str_starts_with($ip, '192.168.') || str_starts_with($ip, '10.');
+if (getenv('APP_ENV') !== 'local' && !$esLocalIp && PHP_SAPI !== 'cli') {
+    http_response_code(403);
+    exit('Probador deshabilitado en produccion');
+}
+
+echo "<h2>Probador de puertos SMTP (usa secure/mail.env o variables de entorno)</h2>";
+
+function probarPuerto(int $port, string $secureLabel): bool
+{
+    global $smtp;
+    $mail = obtener_mailer();
+    $mail->SMTPAutoTLS = false;
+    $mail->Port = $port;
+    $mail->SMTPSecure = ($secureLabel === 'tls')
+        ? \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_STARTTLS
+        : \PHPMailer\PHPMailer\PHPMailer::ENCRYPTION_SMTPS;
+
+    echo "<h3>Probando $secureLabel en puerto $port...</h3>";
+    try {
+        $mail->addAddress($smtp['FROM_EMAIL']);
+        $mail->Subject = "Prueba puerto $port";
+        $mail->Body = "Prueba con {$smtp['SMTP_HOST']}:$port ($secureLabel)";
+        $mail->send();
+        echo "<b style='color:green;'>&#9989; Exito en puerto $port</b><br>";
+        return true;
+    } catch (\Throwable $e) {
+        $msg = htmlspecialchars($mail->ErrorInfo ?: $e->getMessage());
+        echo "<span style='color:red;'>&#10060; Fallo: $msg</span><br>";
+        return false;
+    }
+}
+
+$ok587 = probarPuerto(587, 'tls');
 echo "<hr>";
-$ok465 = probar(465, PHPMailer::ENCRYPTION_SMTPS, "SSL/TLS");
+$ok465 = probarPuerto(465, 'ssl');
 
 echo "<h2>Conclusión:</h2>";
 if ($ok587 || $ok465) {
-    echo "<p style='color:green; font-weight:bold;'>Uno de los puertos funcionó. Usa esa configuración en config_mail.php.</p>";
+    echo "<p style='color:green;font-weight:bold;'>Usa el puerto que funcionó en secure/mail.env.</p>";
 } else {
-    echo "<p style='color:red; font-weight:bold;'>Ninguno funcionó. Google está bloqueando la conexión o el host prohíbe el envío.</p>";
-    echo "<h3>REVISA ESTO EN TU GMAIL:</h3>";
-    echo "1. Ve a <a href='https://myaccount.google.com/notifications' target='_blank'>Notificaciones de Seguridad</a>.<br>";
-    echo "2. ¿Ves un aviso de 'Inicio de sesión bloqueado'? Dale a 'SÍ, FUI YO'.<br>";
-    echo "3. Asegúrate de tener la Verificación en 2 pasos ACTIVA en Gmail.";
+    echo "<p style='color:red;font-weight:bold;'>Ninguno respondió. Revisa credenciales o bloqueos del hosting.</p>";
 }
