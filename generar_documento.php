@@ -153,10 +153,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .certificate-container {
-            width: 182mm;
-            max-width: 182mm;
-            min-height: 230mm;
-            max-height: 255mm;
+            width: 180mm;
+            max-width: 180mm;
+            min-height: 225mm;
+            max-height: 245mm;
             height: auto;
             margin: 0 auto;
             position: relative;
@@ -164,7 +164,7 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
             display: flex;
             flex-direction: column;
-            padding: 9mm 10mm 9mm 10mm;
+            padding: 8mm 10mm 8mm 10mm;
             overflow: hidden;
             page-break-inside: avoid;
             page-break-after: avoid;
@@ -272,19 +272,18 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .subtitle {
-            font-size: 9.5pt;
-            /* Reducido */
-            letter-spacing: 4px;
+            font-size: 9pt;
+            letter-spacing: 3px;
             color: var(--accent);
-            margin-top: 5px;
+            margin-top: 4px;
             font-weight: 600;
         }
 
         .doc-title {
             font-family: 'Playfair Display', serif;
-            font-size: 19pt;
+            font-size: 18.5pt;
             color: var(--primary);
-            margin: 8px 0;
+            margin: 6px 0;
             font-style: italic;
             position: relative;
             display: inline-block;
@@ -302,10 +301,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
 
         .body-text {
             text-align: justify;
-            font-size: 11pt;
-            line-height: 1.35;
-            padding: 0 0.26cm;
-            margin-bottom: 6px;
+            font-size: 10.6pt;
+            line-height: 1.32;
+            padding: 0 0.24cm;
+            margin-bottom: 4px;
             flex-grow: 1;
         }
 
@@ -315,8 +314,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .date-location {
-            font-size: 10.8pt;
-            margin-bottom: 14px;
+            font-size: 10.5pt;
+            margin-bottom: 10px;
             font-style: italic;
         }
 
@@ -325,23 +324,23 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             justify-content: center;
             align-items: flex-end;
             margin-bottom: 8px;
-            gap: 32px;
+            gap: 24px;
             z-index: 10;
         }
 
         .signature-block {
-            width: 180px;
+            width: 170px;
             text-align: center;
         }
 
         .sig-line {
             border-top: 1px solid var(--primary);
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
 
         .sig-name {
             font-weight: 700;
-            font-size: 10pt;
+            font-size: 9.8pt;
             text-transform: uppercase;
             white-space: nowrap;
         }
@@ -359,9 +358,9 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             justify-content: center;
             align-items: center;
             gap: 6px;
-            padding: 0 0.3cm;
+            padding: 0 0.26cm;
             margin-top: 2px;
-            margin-bottom: 4px;
+            margin-bottom: 2px;
             max-width: 140mm;
             width: 100%;
             margin-left: auto;
@@ -399,8 +398,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .qr-image {
-            width: 118px;
-            height: 118px;
+            width: 115px;
+            height: 115px;
             border: 1.5px solid var(--accent);
             padding: 4px;
             background: white;
@@ -435,8 +434,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .digital-seal {
-            width: 90px;
-            height: 90px;
+            width: 82px;
+            height: 82px;
             border: 4px double var(--accent);
             border-radius: 50%;
             display: flex;
@@ -448,13 +447,13 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             font-size: 7pt;
             text-align: center;
             transform: rotate(-10deg);
-            background: rgba(180, 83, 9, 0.03);
+            background: rgba(180, 83, 9, 0.04);
         }
 
         .seal-inner {
             border: 1px solid var(--accent);
-            width: 85px;
-            height: 85px;
+            width: 72px;
+            height: 72px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -463,10 +462,10 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
         }
 
         .footer {
-            font-size: 7.6pt;
+            font-size: 7.3pt;
             color: var(--secondary);
             border-top: 1px solid #eee;
-            padding-top: 4px;
+            padding-top: 3px;
             margin-top: 3px;
         }
 
@@ -490,15 +489,15 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             .certificate-container {
                 margin: 0 auto;
                 box-shadow: none;
-                width: 182mm;
+                width: 180mm;
                 height: auto;
-                min-height: 230mm;
-                max-height: 255mm;
+                min-height: 225mm;
+                max-height: 245mm;
                 overflow: hidden;
                 break-inside: avoid-page;
                 break-before: avoid-page;
                 break-after: avoid-page;
-                transform: scale(0.985);
+                transform: scale(0.975);
                 transform-origin: top center;
             }
 
