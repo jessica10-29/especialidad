@@ -48,13 +48,16 @@ function obtener_mailer()
     $mail->Timeout = $smtp['TIMEOUT'];
 
     // Configuración para saltar errores de certificados SSL
-    $mail->SMTPOptions = [
-        'ssl' => [
-            'verify_peer'       => false,
-            'verify_peer_name'  => false,
-            'allow_self_signed' => true
-        ]
-    ];
+    // Solo desactivar verificacion de certificados si se solicita explicitamente (ej. entorno local)
+    if (!empty($smtp['ALLOW_SELF_SIGNED'])) {
+        $mail->SMTPOptions = [
+            'ssl' => [
+                'verify_peer'       => false,
+                'verify_peer_name'  => false,
+                'allow_self_signed' => true
+            ]
+        ];
+    }
 
     // Configuración del remitente
     $mail->setFrom($smtp['FROM_EMAIL'], $smtp['FROM_NAME']);
