@@ -194,4 +194,105 @@ function verificar_csrf_token($token)
     return hash_equals($_SESSION['csrf_token'], $token);
 }
 
+/**
+ * Devuelve una URL base accesible para escáneres externos (mismo WiFi),
+ * priorizando APP_URL/PUBLIC_BASE_URL y evitando usar localhost en el QR.
+ */
+function construir_base_url()
+{
+    $envUrl = getenv('APP_URL') ?: getenv('PUBLIC_BASE_URL');
+    if (!empty($envUrl)) {
+        return rtrim($envUrl, '/');
+    }
+
+    $forwardProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
+    $protocol = $forwardProto ? (($forwardProto === 'https') ? 'https' : 'http')
+        : ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http');
+
+    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $port = '';
+
+    // Normalizar host y puerto si vienen juntos
+    if (strpos($host, ':') !== false) {
+        [$hostOnly, $portPart] = explode(':', $host, 2);
+        $host = $hostOnly;
+        $port = $portPart;
+    }
+
+    $candidatos = [];
+    if ($host === '' || preg_match('/^(localhost|127\\.0\\.0\\.1|::1)$/', $host)) {
+        if (!empty($_SERVER['SERVER_ADDR'])) {
+            $candidatos[] = $_SERVER['SERVER_ADDR'];
+        }
+        $lan = gethostbyname(gethostname());
+        if ($lan) {
+            $candidatos[] = $lan;
+        }
+    }
+
+    foreach ($candidatos as $cand) {
+        if ($cand && !preg_match('/^(127\\.0\\.0\\.1|::1)$/', $cand)) {
+            $host = $cand;
+            break;
+        }
+    }
+
+    if ($host === '') {
+        $host = '127.0.0.1';
+    }
+
+    // Puerto si no es el estándar
+    if ($port === '' && isset($_SERVER['SERVER_PORT']) && !in_array((string)$_SERVER['SERVER_PORT'], ['80', '443'])) {
+        $port = $_SERVER['SERVER_PORT'];
+    }
+    $portPart = ($port && !in_array((string)$port, ['80', '443'])) ? ':' . $port : '';
+
+    $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
+    $scriptDir = ($scriptDir === '/' ? '' : $scriptDir);
+
+    return "{$protocol}://{$host}{$portPart}{$scriptDir}";
+}
+
+/**
+ * Descarga un recurso con timeout corto. Usa cURL si está disponible;
+ * si no, recurre a file_get_contents con contexto.
+ */
+function descargar_con_timeout(string $url, int $timeout = 5)
+{
+    if (function_exists('curl_init')) {
+        $ch = curl_init($url);
+        curl_setopt_array($ch, [
+            CURLOPT_RETURNTRANSFER => true,
+            CURLOPT_FOLLOWLOCATION => true,
+            CURLOPT_TIMEOUT => $timeout,
+            CURLOPT_CONNECTTIMEOUT => $timeout,
+            CURLOPT_SSL_VERIFYPEER => true,
+            CURLOPT_SSL_VERIFYHOST => 2,
+            CURLOPT_USERAGENT => 'UnicaliQR/1.0',
+        ]);
+        $data = curl_exec($ch);
+        $http = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+        curl_close($ch);
+        if ($data !== false && $http >= 200 && $http < 300) {
+            return $data;
+        }
+    }
+
+    $context = stream_context_create([
+        'http' => ['timeout' => $timeout],
+        'https' => ['timeout' => $timeout, 'verify_peer' => true, 'verify_peer_name' => true],
+    ]);
+
+    $data = @file_get_contents($url, false, $context);
+    return $data === false ? null : $data;
+}
+
+/**
+ * Construye la URL de verificación pública para un folio dado.
+ */
+function url_verificacion(string $folio): string
+{
+    return rtrim(construir_base_url(), '/') . '/verificar.php?folio=' . rawurlencode($folio);
+}
+
 

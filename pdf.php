@@ -37,6 +37,47 @@ $programa = $user_data['programa_academico'] ?? 'No registrado';
 $semestre = $user_data['semestre'] ?? 'N/A';
 $codigo_est = $user_data['codigo_estudiantil'] ?? str_pad($id, 8, "0", STR_PAD_LEFT);
 
+// Folio y URL de verificación listas para QR (evita localhost)
+$folio_id = str_pad($id, 8, "0", STR_PAD_LEFT);
+$folio_completo = 'UC-' . $folio_id;
+$verify_url = url_verificacion($folio_completo);
+
+// Configuración y cacheo de QR para que funcione sin internet
+$qr_api = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($verify_url);
+$qr_fallback = "https://chart.googleapis.com/chart?chs=150x150&cht=qr&chl=" . urlencode($verify_url) . "&choe=UTF-8";
+$qr_dir = __DIR__ . '/uploads/qr';
+if (!is_dir($qr_dir)) {
+    @mkdir($qr_dir, 0755, true);
+}
+$qr_filename = $folio_completo . '.png';
+$qr_local_path = $qr_dir . '/' . $qr_filename;
+$qr_public_path = '/uploads/qr/' . $qr_filename;
+$qr_src = $qr_fallback;
+$qr_binary = null;
+
+$qr_sources = [$qr_api, $qr_fallback];
+foreach ($qr_sources as $srcTry) {
+    $qr_binary = descargar_con_timeout($srcTry, 5);
+    if ($qr_binary !== null && strlen($qr_binary) > 0) {
+        @file_put_contents($qr_local_path, $qr_binary);
+        break;
+    }
+}
+
+$qr_binary = ($qr_binary === null && file_exists($qr_local_path))
+    ? @file_get_contents($qr_local_path)
+    : $qr_binary;
+
+if ($qr_binary === false) {
+    $qr_binary = null;
+}
+
+if ($qr_binary !== null) {
+    $qr_src = 'data:image/png;base64,' . base64_encode($qr_binary);
+} elseif (file_exists($qr_local_path)) {
+    $qr_src = $qr_public_path . '?v=' . filemtime($qr_local_path);
+}
+
 // Filtro por materia si viene en la URL
 $where_materia = "";
 $materia_nombre_display = "CERTIFICADO DE CALIFICACIONES";
@@ -453,23 +494,16 @@ if (!$res) {
 
             <!-- Verification QR - Refactorizado para máxima compatibilidad -->
             <div class="qr-section-container" style="display: flex; justify-content: center; align-items: center; gap: 18px; border: 2px solid #f1f5f9; padding: 16px; border-radius: 16px; background: #fafafa; margin: 30px auto 0; position: relative; z-index: 10; max-width: 640px; width: 100%; box-sizing: border-box;">
-                <?php
-                $protocol = isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http";
-                $folio_id = str_pad($id, 8, "0", STR_PAD_LEFT);
-                $verify_url = $protocol . "://" . $_SERVER['HTTP_HOST'] . "/verificar.php?folio=UC-" . $folio_id;
-                // Usando QRServer API (más moderna y rápida)
-                $qr_api = "https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=" . urlencode($verify_url);
-                ?>
                 <div style="background: white; padding: 10px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); min-width: 140px; min-height: 140px; display: flex; align-items: center; justify-content: center; border: 1px solid #eee;">
-                    <img src="<?php echo $qr_api; ?>" width="120" height="120" alt="QR de Verificación"
+                    <img src="<?php echo $qr_src; ?>" width="120" height="120" alt="QR de Verificación"
                         style="display: block;"
                         crossorigin="anonymous"
                         onload="this.style.opacity='1'"
-                        onerror="this.parentElement.innerHTML='<div style=\'font-size:10px;color:red;text-align:center\'>Error al cargar QR<br>Verifique internet</div>'">
+                        onerror="this.src='<?php echo $qr_fallback; ?>'">
                 </div>
                 <div style="font-family: 'Plus Jakarta Sans', sans-serif; font-size: 11px; line-height: 1.5; color: var(--primary);">
                     <div style="background: var(--secondary); color: white; display: inline-block; padding: 2px 8px; border-radius: 4px; font-weight: 800; font-size: 9px; margin-bottom: 8px; letter-spacing: 1px;">SISTEMA DE VERIFICACIÓN OFICIAL</div><br>
-                    <b style="font-size: 14px; display: block; margin-bottom: 2px;">FOLIO No: UC-<?php echo $folio_id; ?></b>
+                    <b style="font-size: 14px; display: block; margin-bottom: 2px;">FOLIO No: <?php echo $folio_completo; ?></b>
                     <span style="color: var(--text-muted); font-style: italic;">Este documento cuenta con firma digital y código de validación único.<br>
                         Para verificar la autenticidad, escanee el código QR con cualquier dispositivo móvil.<br>
                         <b>Unicali Segura - Registro y Control Académico.</b></span>

@@ -68,47 +68,7 @@ if ($q_prom && ($pr = $q_prom->fetch_assoc()) && $pr['prom'] !== null) {
     $promedio_estudiante = number_format((float)$pr['prom'], 2);
 }
 
-// Generar URL de Verificación robusta (evita barras invertidas, usa IP LAN si es localhost)
-$forward_proto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
-$protocol = $forward_proto ? (($forward_proto === 'https') ? 'https' : 'http') : ((isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https" : "http");
-
-$app_url = rtrim(getenv('APP_URL') ?: getenv('PUBLIC_BASE_URL') ?: '', '/');
-
-$host = $_SERVER['HTTP_HOST'] ?? '';
-// Si no hay host, intenta con SERVER_ADDR o hostname
-if ($host === '') {
-    if (!empty($_SERVER['SERVER_ADDR'])) {
-        $host = $_SERVER['SERVER_ADDR'];
-    } else {
-        $host = gethostbyname(gethostname());
-    }
-}
-
-// Normalizar puerto
-$port = '';
-if (strpos($host, ':') !== false) {
-    [$hostOnly, $portPart] = explode(':', $host, 2);
-    $host = $hostOnly;
-    $port = ':' . $portPart;
-} elseif (isset($_SERVER['SERVER_PORT']) && !in_array((string)$_SERVER['SERVER_PORT'], ['80', '443'])) {
-    $port = ':' . $_SERVER['SERVER_PORT'];
-}
-
-// Si es localhost/127 o ::1, usa IP LAN para que funcione en móvil
-if (!$app_url && preg_match('/^(localhost|127\\.0\\.0\\.1|::1)$/', $host) && !empty($_SERVER['SERVER_ADDR'])) {
-    $host = $_SERVER['SERVER_ADDR'];
-}
-
-// Fuerza http en redes privadas si no hay APP_URL (evita bloqueos por https sin cert)
-if (!$app_url && preg_match('/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/', $host)) {
-    $protocol = 'http';
-}
-
-$script_dir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
-$script_dir = ($script_dir === '/' ? '' : $script_dir);
-
-$base_url = $app_url ?: "{$protocol}://{$host}{$port}{$script_dir}";
-$verify_url = rtrim($base_url, '/') . "/verificar.php?folio=" . rawurlencode($folio);
+$verify_url = url_verificacion($folio);
 // Proveedor principal (qrserver) y fallback a Google Charts si falla la carga
 $qr_api_url = "https://api.qrserver.com/v1/create-qr-code/?size=170x170&data=" . urlencode($verify_url);
 $qr_fallback = "https://chart.googleapis.com/chart?chs=170x170&cht=qr&chl=" . urlencode($verify_url) . "&choe=UTF-8";
@@ -128,21 +88,24 @@ $qr_binary = null;
 // Intentar generar un QR fresco (evita cache con URL antigua)
 $qr_sources = [$qr_api_url, $qr_fallback];
 foreach ($qr_sources as $srcTry) {
-    $context = stream_context_create(['http' => ['timeout' => 4], 'https' => ['timeout' => 4]]);
-    $qr_binary = @file_get_contents($srcTry, false, $context);
-    if ($qr_binary !== false && strlen($qr_binary) > 0) {
+    $qr_binary = descargar_con_timeout($srcTry, 5);
+    if ($qr_binary !== null && strlen($qr_binary) > 0) {
         @file_put_contents($qr_local_path, $qr_binary); // actualiza archivo local
         break;
     }
 }
 
 // Si no se pudo descargar, usar archivo previo si existe
-if (($qr_binary === false || $qr_binary === null) && file_exists($qr_local_path)) {
-    $qr_binary = @file_get_contents($qr_local_path);
+$qr_binary = ($qr_binary === null && file_exists($qr_local_path))
+    ? @file_get_contents($qr_local_path)
+    : $qr_binary;
+
+if ($qr_binary === false) {
+    $qr_binary = null;
 }
 
 // Si tenemos binario, usar data URI (ideal para impresión y escaneo)
-if ($qr_binary !== false && $qr_binary !== null) {
+if ($qr_binary !== null) {
     $qr_data_uri = 'data:image/png;base64,' . base64_encode($qr_binary);
     $qr_src = $qr_data_uri;
 } elseif (file_exists($qr_local_path)) {
