@@ -1,6 +1,7 @@
 ﻿# Credenciales y datos sensibles
 secure/config.php
 secure/*.json
+secure/mail.php
 secure/*.env
 *.env
 *.env.local
