@@ -45,3 +45,12 @@ Stack trace:
 [08-Mar-2026 23:04:11 Europe/Berlin] PHP Warning:  Undefined array key "archivo_pdf " in C:\xampp\htdocs\especialidad\procesar_entrega.php on line 39
 [08-Mar-2026 23:04:11 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type null in C:\xampp\htdocs\especialidad\procesar_entrega.php on line 39
 [08-Mar-2026 23:04:11 Europe/Berlin] PHP Deprecated:  move_uploaded_file(): Passing null to parameter #1 ($from) of type string is deprecated in C:\xampp\htdocs\especialidad\procesar_entrega.php on line 39
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 36
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 37
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 40
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 41
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 43
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 47
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 49
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 64
+[25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 64

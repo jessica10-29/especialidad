@@ -13,7 +13,7 @@ if (!empty($folio) && strpos($folio, 'UC-') === 0) {
     $id = (int)$id_str;
 
     if ($id > 0) {
-        $stmt = $conn->prepare("SELECT nombre, created_at, rol FROM usuarios WHERE id = ?");
+        $stmt = $conn->prepare("SELECT nombre, identificacion, codigo_estudiantil, programa_academico, semestre, created_at, rol FROM usuarios WHERE id = ?");
         $stmt->bind_param("i", $id);
         $stmt->execute();
         $res = $stmt->get_result();
@@ -212,6 +212,21 @@ if (!empty($folio) && strpos($folio, 'UC-') === 0) {
     <div class="info-row">
         <span class="label">Folio</span>
         <span class="value"><?php echo htmlspecialchars($folio); ?></span>
+    </div>
+    <div class="info-row">
+        <span class="label">IdentificaciÃ³n</span>
+        <span class="value"><?php echo htmlspecialchars($usuario['identificacion'] ?? 'No registrada'); ?></span>
+    </div>
+    <div class="info-row">
+        <span class="label">CÃ³digo Estudiantil</span>
+        <span class="value"><?php echo htmlspecialchars($usuario['codigo_estudiantil'] ?? 'N/A'); ?></span>
+    </div>
+    <div class="info-row">
+        <span class="label">Programa / Semestre</span>
+        <span class="value">
+            <?php echo htmlspecialchars($usuario['programa_academico'] ?? 'N/A'); ?>
+            <?php if (!empty($usuario['semestre'])): ?> â€¢ Sem. <?php echo htmlspecialchars($usuario['semestre']); ?><?php endif; ?>
+        </span>
     </div>
     <div class="info-row">
         <span class="label">Estado Institucional</span>
