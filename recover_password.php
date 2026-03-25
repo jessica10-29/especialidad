@@ -180,7 +180,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             <?php if (isset($_GET['ok'])): ?>
                 <div style="background: rgba(16, 185, 129, 0.1); color: #34d399; padding: 15px; border-radius: 10px; margin-bottom: 25px; font-size: 0.9rem; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center;">
-                    <i class="fa-solid fa-circle-check"></i> Si los datos coinciden, hemos enviado las instrucciones a tu correo institucional. Revisa tu bandeja de entrada.
+                    <i class="fa-solid fa-circle-check"></i> Si los datos coinciden, hemos enviado las instrucciones a tu correo personal. Revisa tu bandeja de entrada.
                 </div>
             <?php endif; ?>
 
