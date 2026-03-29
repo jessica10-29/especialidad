@@ -1,4 +1,6 @@
 <?php
+require_once __DIR__ . '/procesar_entrega_seguro.php';
+exit;
 require_once 'conexion.php';
 verificar_sesion();
 verificar_rol('estudiante');

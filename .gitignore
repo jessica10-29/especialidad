@@ -13,7 +13,11 @@ logs/
 *.swp
 
 # Subidas de usuarios
-uploads/
+uploads/*
+!uploads/.htaccess
+!uploads/entregas/
+uploads/entregas/*
+!uploads/entregas/.htaccess
 
 # Dependencias comunes
 node_modules/

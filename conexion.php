@@ -194,6 +194,134 @@ function verificar_csrf_token($token)
     return hash_equals($_SESSION['csrf_token'], $token);
 }
 
+function nombre_archivo_entrega_valido($nombre)
+{
+    if (!is_string($nombre) || $nombre === '') {
+        return false;
+    }
+
+    return preg_match('/^entrega_[0-9]+_[0-9]+_[A-Za-z0-9_-]+\.pdf$/i', $nombre) === 1;
+}
+
+function ruta_esta_dentro_de_directorio($ruta, $directorioBase)
+{
+    $baseReal = realpath($directorioBase);
+    $rutaReal = realpath($ruta);
+
+    if ($baseReal === false || $rutaReal === false) {
+        return false;
+    }
+
+    $baseNormalizada = rtrim(str_replace('\\', '/', $baseReal), '/') . '/';
+    $rutaNormalizada = str_replace('\\', '/', $rutaReal);
+
+    return strpos($rutaNormalizada, $baseNormalizada) === 0;
+}
+
+function limpiar_nombre_descarga($nombre, $fallback = 'documento.pdf')
+{
+    $nombre = trim((string)$nombre);
+    $nombre = preg_replace('/[^A-Za-z0-9._-]+/', '_', $nombre);
+    $nombre = trim($nombre, '._-');
+
+    if ($nombre === '') {
+        $nombre = $fallback;
+    }
+
+    if (strtolower(pathinfo($nombre, PATHINFO_EXTENSION)) !== 'pdf') {
+        $nombre .= '.pdf';
+    }
+
+    return $nombre;
+}
+
+function validar_pdf_seguro($rutaArchivo, &$error = null, $maxBytes = null)
+{
+    $error = null;
+
+    if (!is_string($rutaArchivo) || $rutaArchivo === '' || !is_file($rutaArchivo) || !is_readable($rutaArchivo)) {
+        $error = 'El archivo PDF no existe o no se puede leer.';
+        return false;
+    }
+
+    $tamano = @filesize($rutaArchivo);
+    if ($tamano === false || $tamano <= 0) {
+        $error = 'El archivo PDF esta vacio o no se pudo medir.';
+        return false;
+    }
+
+    if ($maxBytes !== null && $tamano > (int)$maxBytes) {
+        $error = 'El archivo PDF supera el tamano permitido.';
+        return false;
+    }
+
+    $manejador = @fopen($rutaArchivo, 'rb');
+    if ($manejador === false) {
+        $error = 'No fue posible abrir el archivo PDF.';
+        return false;
+    }
+
+    $firma = @fread($manejador, 5);
+    @fclose($manejador);
+
+    if ($firma !== '%PDF-') {
+        $error = 'El archivo no tiene una firma PDF valida.';
+        return false;
+    }
+
+    $mimeType = null;
+    if (function_exists('finfo_open')) {
+        $finfo = @finfo_open(FILEINFO_MIME_TYPE);
+        if ($finfo !== false) {
+            $mimeType = @finfo_file($finfo, $rutaArchivo) ?: null;
+            @finfo_close($finfo);
+        }
+    }
+
+    $mimePermitidos = [
+        'application/pdf',
+        'application/x-pdf',
+        'application/acrobat',
+        'applications/vnd.pdf',
+        'text/pdf',
+        'text/x-pdf',
+        'application/octet-stream',
+    ];
+
+    if ($mimeType !== null && !in_array(strtolower($mimeType), $mimePermitidos, true)) {
+        $error = 'El tipo MIME del archivo no corresponde a un PDF permitido.';
+        return false;
+    }
+
+    $contenido = @file_get_contents($rutaArchivo);
+    if ($contenido === false) {
+        $error = 'No fue posible inspeccionar el contenido del PDF.';
+        return false;
+    }
+
+    $patronesPeligrosos = [
+        '/JavaScript',
+        '/JS',
+        '/OpenAction',
+        '/AA',
+        '/Launch',
+        '/RichMedia',
+        '/EmbeddedFile',
+        '/XFA',
+        '/SubmitForm',
+        '/ImportData',
+    ];
+
+    foreach ($patronesPeligrosos as $patron) {
+        if (stripos($contenido, $patron) !== false) {
+            $error = 'El PDF contiene elementos activos o incrustados no permitidos.';
+            return false;
+        }
+    }
+
+    return true;
+}
+
 /**
  * Devuelve una URL base accesible para escáneres externos (mismo WiFi),
  * priorizando APP_URL/PUBLIC_BASE_URL y evitando usar localhost en el QR.

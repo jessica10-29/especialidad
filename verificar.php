@@ -42,6 +42,7 @@ if (!empty($folio) && strpos($folio, 'UC-') === 0) {
             --success: #10b981;
             --danger: #f43f5e;
             --bg: #0f172a;
+            
         }
 
         * {

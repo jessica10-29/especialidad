@@ -56,7 +56,7 @@ $entregas = $conn->query("SELECT e.*, u.nombre as estudiante, u.email FROM entre
                                     <td><?php echo date('d M, Y H:i', strtotime($e['fecha_entrega'])); ?></td>
                                     <td style="max-width: 250px; font-size: 0.85rem;"><?php echo htmlspecialchars($e['comentario'] ?: 'Sin comentario'); ?></td>
                                     <td>
-                                        <a href="uploads/entregas/<?php echo $e['archivo']; ?>" target="_blank" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">
+                                        <a href="descargar_entrega.php?id=<?php echo (int)$e['id']; ?>" class="btn btn-primary" style="padding: 6px 12px; font-size: 0.8rem;">
                                             <i class="fa-solid fa-download"></i> Descargar
                                         </a>
                                     </td>

@@ -4,6 +4,7 @@ verificar_sesion();
 verificar_rol('estudiante');
 
 $estudiante_id = $_SESSION['usuario_id'];
+$csrf_token = generar_csrf_token();
 
 // Listado de materias inscritas para el estudiante (se usa tanto en la vista de selección como en detalle)
 $materias_disponibles = $conn->query("SELECT m.id, m.nombre, m.codigo, m.descripcion 
@@ -346,10 +347,12 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
 
                 <div class="card glass-panel fade-in" style="padding: 20px; margin-bottom: 30px;">
                     <?php
-                    $sql_act = "SELECT a.*, (SELECT COUNT(*) FROM entregas e WHERE e.actividad_id = a.id AND e.estudiante_id = $estudiante_id) as entregado 
-                                FROM actividades a 
-                                WHERE a.materia_id = $materia_id 
-                                ORDER BY a.fecha_limite ASC";
+                    $sql_act = "SELECT a.*,
+                                       (SELECT COUNT(*) FROM entregas e WHERE e.actividad_id = a.id AND e.estudiante_id = $estudiante_id) as entregado,
+                                       (SELECT e.id FROM entregas e WHERE e.actividad_id = a.id AND e.estudiante_id = $estudiante_id LIMIT 1) as entrega_id
+                                 FROM actividades a 
+                                 WHERE a.materia_id = $materia_id 
+                                 ORDER BY a.fecha_limite ASC";
                     $res_act = $conn->query($sql_act);
 
                     if ($res_act && $res_act->num_rows > 0): ?>
@@ -371,8 +374,8 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
                                     </div>
                                     <div style="display: flex; gap: 10px;">
                                         <?php if ($act['entregado'] > 0): ?>
-                                            <a href="#" class="btn btn-outline" style="font-size: 0.8rem; border-color: #34d399; color: #34d399;">
-                                                <i class="fa-solid fa-eye"></i> Ver Mi Entrega
+                                            <a href="descargar_entrega.php?id=<?php echo (int)$act['entrega_id']; ?>" class="btn btn-outline" style="font-size: 0.8rem; border-color: #34d399; color: #34d399;">
+                                                <i class="fa-solid fa-eye"></i> Descargar Mi Entrega
                                             </a>
                                         <?php elseif ($puedes_subir): ?>
                                             <button onclick="abrirModalSubir(<?php echo $act['id']; ?>, '<?php echo addslashes($act['titulo']); ?>')" class="btn btn-primary" style="font-size: 0.8rem;">
@@ -401,12 +404,13 @@ $page_title = $modo_lista ? "Mis Calificaciones - Unicali" : "Notas: " . htmlspe
         <div class="glass-panel" style="max-width: 500px; width: 90%; padding: 30px;">
             <h3 id="modal-titulo" style="margin-bottom: 20px;">Subir Trabajo</h3>
             <form id="form-subida" action="procesar_entrega.php" method="POST" enctype="multipart/form-data">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars($csrf_token); ?>">
                 <input type="hidden" name="actividad_id" id="act-id">
                 <input type="hidden" name="materia_nombre" value="<?php echo htmlspecialchars($nombre_materia); ?>">
                 
                 <div class="input-group">
                     <label class="input-label">Archivo (solo PDF - Max 5MB)</label>
-                    <input type="file" name="archivo" class="input-field" accept=".pdf" required style="padding: 10px;">
+                    <input type="file" name="archivo" class="input-field" accept="application/pdf,.pdf" required style="padding: 10px;">
                 </div>
 
                 <div class="input-group">
