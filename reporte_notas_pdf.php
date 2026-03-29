@@ -177,11 +177,19 @@ $fecha_reporte = date('d/m/Y H:i');
         <tbody>
             <?php while ($al = $alumnos->fetch_assoc()):
                 $mid = $al['matricula_id'];
-                $q_notas = $conn->query("SELECT corte, valor FROM notas WHERE matricula_id = $mid");
+                $q_notas = $conn->query("SELECT corte, valor FROM notas WHERE matricula_id = $mid ORDER BY corte ASC");
                 $notas = [];
-                while ($n = $q_notas->fetch_assoc()) $notas[$n['corte']] = $n['valor'];
+                while ($n = $q_notas->fetch_assoc()) {
+                    $notas[$n['corte']] = number_format((float)$n['valor'], 1);
+                }
 
-                $def = ($notas['Corte 1'] ?? 0) * 0.2 + ($notas['Corte 2'] ?? 0) * 0.2 + ($notas['Corte 3'] ?? 0) * 0.2 + ($notas['Examen Final'] ?? 0) * 0.3 + ($notas['Seguimiento'] ?? 0) * 0.1;
+                $c1 = isset($notas['Corte 1']) ? (float)str_replace(',', '.', $notas['Corte 1']) : 0;
+                $c2 = isset($notas['Corte 2']) ? (float)str_replace(',', '.', $notas['Corte 2']) : 0;
+                $c3 = isset($notas['Corte 3']) ? (float)str_replace(',', '.', $notas['Corte 3']) : 0;
+                $ef = isset($notas['Examen Final']) ? (float)str_replace(',', '.', $notas['Examen Final']) : 0;
+                $sg = isset($notas['Seguimiento']) ? (float)str_replace(',', '.', $notas['Seguimiento']) : 0;
+
+                $def = ($c1 * 0.2) + ($c2 * 0.2) + ($c3 * 0.2) + ($ef * 0.3) + ($sg * 0.1);
             ?>
                 <tr>
                     <td>

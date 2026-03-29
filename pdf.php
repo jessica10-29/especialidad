@@ -84,7 +84,7 @@ $materia_nombre_display = "CERTIFICADO DE CALIFICACIONES";
 if (isset($_GET['materia'])) {
     $m_input = limpiar_dato($_GET['materia']);
     $where_materia = " AND m.nombre = '$m_input'";
-    $materia_nombre_display = "REPORT ACADÉMICO: " . htmlspecialchars($_GET['materia']);
+    $materia_nombre_display = "REPORTE ACADÉMICO: " . htmlspecialchars($m_input);
 }
 
 // Pesos del sistema de 5 cortes

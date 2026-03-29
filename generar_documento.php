@@ -405,6 +405,8 @@ $barcode_url = "https://bwipjs-api.metafloor.com/?bcid=code128&text=" . urlencod
             background: white;
             box-shadow: 0 2px 5px rgba(0, 0, 0, 0.05);
             image-rendering: crisp-edges;
+            page-break-inside: avoid;
+            break-inside: avoid;
         }
 
         .qr-link {
