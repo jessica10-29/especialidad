@@ -55,8 +55,12 @@ body {
     background-attachment: fixed;
     color: var(--text-white);
     min-height: 100vh;
+    min-height: 100dvh;
     overflow-x: hidden;
     line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    opacity: 1;
 }
 
 /* Usamos hero.png como fondo; se oculta la malla secundaria */
@@ -89,6 +93,7 @@ body {
     border: 1px solid var(--glass-border);
     border-radius: var(--radius);
     box-shadow: var(--glass-shadow);
+    will-change: transform, background-color;
 }
 
 /* Components */
@@ -161,6 +166,9 @@ body {
     transition: var(--transition);
     outline: none;
     font-size: var(--body);
+    -webkit-appearance: none;
+    -moz-appearance: none;
+    appearance: none;
 }
 
 .input-field:focus {

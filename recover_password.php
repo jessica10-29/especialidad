@@ -1,12 +1,13 @@
 ﻿<?php
 require_once 'conexion.php';
+require_once 'funciones_mail.php';
 // Asegurar UTF-8 y mostrar errores en esta página (evita pantalla en blanco si algo falla)
 if (!headers_sent()) {
     header('Content-Type: text/html; charset=UTF-8');
 }
 ini_set('display_errors', 1);
 error_reporting(E_ALL);
-set_time_limit(15);
+set_time_limit(60);
 
 // Log de fatal errors por si el hosting suprime output
 $fatalLog = __DIR__ . '/logs/mail-send.log';
@@ -74,79 +75,28 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
             $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
             $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $link = "$protocol://$host/reset_password.php?token=$token";
+            $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
+            $basePath = ($basePath === '' || $basePath === '.') ? '' : $basePath;
+            $link = sprintf('%s://%s%s/reset_password.php?token=%s', $protocol, $host, $basePath, urlencode($token));
 
-            $log('Enviando a ' . $email . ' link=' . $link);
+            $log('Agregando correo a cola para ' . $email);
 
-            require_once 'config_mail.php';
-
-            $mail = obtener_mailer();
-            $mail->addAddress($email, $nombre);
-
-            $mail->isHTML(true);
-            $mail->Subject = 'Recuperacion de contrasena';
-            $mail->Body = "
-                <div style='font-family: Arial, sans-serif; color: #333;'>
-                    <h2 style='color: #0d6efd;'>Recuperar contrasena</h2>
-                    <p>Hola {$nombre},</p>
-                    <p>Has solicitado restablecer tu contrasena en la <strong>Plataforma UNICALI</strong>. Haz clic en el boton de abajo para continuar:</p>
-                    <p style='margin: 30px 0;'>
-                        <a href='$link' style='
-                            padding: 12px 24px;
-                            background-color: #0d6efd;
-                            color: white;
-                            text-decoration: none;
-                            border-radius: 5px;
-                            font-weight: bold;'>
-                            Cambiar contrasena
-                        </a>
-                    </p>
-                    <p style='font-size: 0.9em; color: #666;'>Este enlace vencera en 1 hora por razones de seguridad.</p>
-                    <hr style='border: 0; border-top: 1px solid #eee; margin-top: 30px;'>
-                    <p style='font-size: 0.8em; color: #999;'>Si no solicitaste este cambio, puedes ignorar este correo.</p>
-                </div>
-            ";
-
-            if (!$mail->send()) {
-                $log('PHPMailer send() error: ' . $mail->ErrorInfo);
-                throw new Exception($mail->ErrorInfo ?: 'El servidor SMTP rechazo la solicitud.');
+            // Usar sistema de cola en lugar de envío directo (sin timeout)
+            if (enviar_correo_recuperacion($email, $nombre, $link)) {
+                $log('✓ Correo agregado a cola exitosamente');
+                header('Location: recover_password.php?ok=1');
+                exit;
+            } else {
+                $log('Error al agregar correo a cola');
+                throw new Exception('No se pudo procesar el envío del correo. Intenta más tarde.');
             }
-
-            header('Location: recover_password.php?ok=1');
-            exit;
         } else {
             $safeSearch = htmlspecialchars($search, ENT_QUOTES, 'UTF-8');
             $error_envio = "El correo o identificacion '$safeSearch' no esta registrado.";
         }
     } catch (Exception $e) {
-        // Fallback para entorno local: registrar el correo en logs y simular exito
-        $host = $_SERVER['HTTP_HOST'] ?? '';
-        $forceProd = getenv('SMTP_FORCE_PROD');
-        $isLocal = !$forceProd && (
-            stripos($host, 'localhost') !== false
-            || stripos($host, '127.0.0.1') !== false
-            || getenv('APP_ENV') === 'local'
-        );
-
-        if (isset($mail) && $isLocal) {
-            $logPath = __DIR__ . '/logs/mail-local.log';
-            $payload = "---- " . date('Y-m-d H:i:s') . " ----\n"
-                . "TO: {$email}\nSUBJECT: Recuperacion de contrasena\nLINK: {$link}\n\n"
-                . "HTML:\n" . strip_tags($mail->Body ?? '') . "\n\n";
-            file_put_contents($logPath, $payload, FILE_APPEND | LOCK_EX);
-            header('Location: recover_password.php?ok=1&simulado=1');
-            exit;
-        }
-
         $log('Excepcion: ' . $e->getMessage());
-        $error_info = isset($mail) ? ($mail->ErrorInfo ?? '') : '';
-
-        if (strpos(strtolower($error_info), 'authenticate') !== false) {
-            $error_envio = "<b>Error de autenticacion:</b> Google rechazo la clave. <br>1. Revisa que tu 'Contrasena de aplicacion' sea correcta. <br>2. Confirma en tu Gmail el aviso de 'Inicio de sesion bloqueado'.";
-        } else {
-            $detalle = $e->getMessage() ?: $error_info;
-            $error_envio = 'No pudimos enviar el correo. Detalle: ' . htmlspecialchars($detalle, ENT_QUOTES, 'UTF-8');
-        }
+        $error_envio = 'No pudimos procesar tu solicitud: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
     }
 }
 ?>

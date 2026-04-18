@@ -86,3 +86,177 @@ HTML:
                 
             
 
+---- 2026-04-18 04:22:49 ----
+TO: seguraordonezpaola@gmail.com
+NOMBRE: Jessica Paola Segura Ordonez
+SUBJECT: Recuperación de contraseña - UnivaliSegura
+TIPO: reset_password
+
+CONTENIDO HTML:
+
+        <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;'>
+            <table width='100%' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px;'>
+                <tr>
+                    <td style='text-align: center; color: white;'>
+                        <h1 style='margin: 0;'>UnivaliSegura</h1>
+                        <p style='margin: 5px 0 0; opacity: 0.9;'>Portal Educativo Seguro</p>
+                    </td>
+                </tr>
+            </table>
+
+            <div style='padding: 30px; background: white; border: 1px solid #e0e0e0;'>
+                <h2 style='color: #667eea; margin-top: 0;'>Recuperar tu contraseña</h2>
+                <p>Hola <strong>Jessica Paola Segura Ordonez</strong>,</p>
+                
+                <p>Has solicitado restablecer tu contraseña en <strong>UnivaliSegura</strong>. Haz clic en el botón de abajo para continuar:</p>
+                
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='https://localhost/especialidad/reset_password.php?token=7a36f11ae244b639e60e5277fb4624c9e2c6c417bb0a32d6226d53c6bb2bcbe2' style='
+                        display: inline-block;
+                        padding: 14px 32px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        font-size: 16px;
+                    '>
+                        Cambiar Contraseña
+                    </a>
+                </div>
+
+                <div style='background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <p style='margin: 0; font-size: 0.9em; color: #666;'>
+                        <strong>Nota importante:</strong><br>
+                        • Este enlace vencerá en 1 hora<br>
+                        • Si no solicitaste este cambio, ignora este correo<br>
+                        • Nunca compartir este enlace con otros
+                    </p>
+                </div>
+
+                <hr style='border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;'>
+                
+                <p style='font-size: 0.85em; color: #999;'>
+                    Este correo fue enviado automáticamente. Respuestas a este correo no serán revisadas.<br>
+                    <a href='https://unicalisegura.com' style='color: #667eea; text-decoration: none;'>Visita nuestro portal</a>
+                </p>
+            </div>
+        </div>
+    
+
+---- 2026-04-18 04:26:29 ----
+TO: seguraordonezpaola@gmail.com
+NOMBRE: Jessica Paola Segura Ordonez
+SUBJECT: Recuperación de contraseña - UnivaliSegura
+TIPO: reset_password
+
+CONTENIDO HTML:
+
+        <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;'>
+            <table width='100%' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px;'>
+                <tr>
+                    <td style='text-align: center; color: white;'>
+                        <h1 style='margin: 0;'>UnivaliSegura</h1>
+                        <p style='margin: 5px 0 0; opacity: 0.9;'>Portal Educativo Seguro</p>
+                    </td>
+                </tr>
+            </table>
+
+            <div style='padding: 30px; background: white; border: 1px solid #e0e0e0;'>
+                <h2 style='color: #667eea; margin-top: 0;'>Recuperar tu contraseña</h2>
+                <p>Hola <strong>Jessica Paola Segura Ordonez</strong>,</p>
+                
+                <p>Has solicitado restablecer tu contraseña en <strong>UnivaliSegura</strong>. Haz clic en el botón de abajo para continuar:</p>
+                
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='https://localhost/especialidad/reset_password.php?token=e42b0a14bf88f6ebb898d605cd28bd2f37ca4fb156786437d0caf689c191d8ca' style='
+                        display: inline-block;
+                        padding: 14px 32px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        font-size: 16px;
+                    '>
+                        Cambiar Contraseña
+                    </a>
+                </div>
+
+                <div style='background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <p style='margin: 0; font-size: 0.9em; color: #666;'>
+                        <strong>Nota importante:</strong><br>
+                        • Este enlace vencerá en 1 hora<br>
+                        • Si no solicitaste este cambio, ignora este correo<br>
+                        • Nunca compartir este enlace con otros
+                    </p>
+                </div>
+
+                <hr style='border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;'>
+                
+                <p style='font-size: 0.85em; color: #999;'>
+                    Este correo fue enviado automáticamente. Respuestas a este correo no serán revisadas.<br>
+                    <a href='https://unicalisegura.com' style='color: #667eea; text-decoration: none;'>Visita nuestro portal</a>
+                </p>
+            </div>
+        </div>
+    
+
+---- 2026-04-19 00:59:14 ----
+TO: seguraordonezpaola@gmail.com
+NOMBRE: Jessica Paola Segura Ordonez
+SUBJECT: Recuperación de contraseña - UnivaliSegura
+TIPO: reset_password
+
+CONTENIDO HTML:
+
+        <div style='font-family: Arial, sans-serif; color: #333; max-width: 600px; margin: 0 auto;'>
+            <table width='100%' style='background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); padding: 30px; border-radius: 10px;'>
+                <tr>
+                    <td style='text-align: center; color: white;'>
+                        <h1 style='margin: 0;'>UnivaliSegura</h1>
+                        <p style='margin: 5px 0 0; opacity: 0.9;'>Portal Educativo Seguro</p>
+                    </td>
+                </tr>
+            </table>
+
+            <div style='padding: 30px; background: white; border: 1px solid #e0e0e0;'>
+                <h2 style='color: #667eea; margin-top: 0;'>Recuperar tu contraseña</h2>
+                <p>Hola <strong>Jessica Paola Segura Ordonez</strong>,</p>
+                
+                <p>Has solicitado restablecer tu contraseña en <strong>UnivaliSegura</strong>. Haz clic en el botón de abajo para continuar:</p>
+                
+                <div style='text-align: center; margin: 30px 0;'>
+                    <a href='https://localhost/especialidad/reset_password.php?token=29973146feae2a8ca3e5c9cc9b50449432b7f0fb7bdcba87afbe4b4340eae0a2' style='
+                        display: inline-block;
+                        padding: 14px 32px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        text-decoration: none;
+                        border-radius: 8px;
+                        font-weight: bold;
+                        font-size: 16px;
+                    '>
+                        Cambiar Contraseña
+                    </a>
+                </div>
+
+                <div style='background: #f5f5f5; padding: 15px; border-radius: 8px; margin: 20px 0;'>
+                    <p style='margin: 0; font-size: 0.9em; color: #666;'>
+                        <strong>Nota importante:</strong><br>
+                        • Este enlace vencerá en 1 hora<br>
+                        • Si no solicitaste este cambio, ignora este correo<br>
+                        • Nunca compartir este enlace con otros
+                    </p>
+                </div>
+
+                <hr style='border: 0; border-top: 1px solid #e0e0e0; margin: 20px 0;'>
+                
+                <p style='font-size: 0.85em; color: #999;'>
+                    Este correo fue enviado automáticamente. Respuestas a este correo no serán revisadas.<br>
+                    <a href='https://unicalisegura.com' style='color: #667eea; text-decoration: none;'>Visita nuestro portal</a>
+                </p>
+            </div>
+        </div>
+    
+

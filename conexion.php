@@ -423,4 +423,10 @@ function url_verificacion(string $folio): string
     return rtrim(construir_base_url(), '/') . '/verificar.php?folio=' . rawurlencode($folio);
 }
 
-
+// === AUTO-PROCESADOR DE COLA DE CORREOS EN LOCALHOST ===
+// Ejecuta automáticamente en background para procesar correos pendientes
+if ($isLocal && php_sapi_name() !== 'cli' && !headers_sent()) {
+    register_shutdown_function(function() {
+        @include_once __DIR__ . '/procesar_cola_auto.php';
+    });
+}

@@ -15,6 +15,33 @@ if (!file_exists($smtpConfigPath)) {
     die('Falta secure/mail.php con las credenciales SMTP.');
 }
 $smtp = require $smtpConfigPath;
+if (!is_array($smtp)) {
+    throw new RuntimeException('La configuracion SMTP no devolvio un arreglo valido.');
+}
+
+$smtp = array_merge(
+    [
+        'SMTP_HOST' => '',
+        'SMTP_PORT' => 587,
+        'SMTP_SECURE' => 'tls',
+        'SMTP_USER' => '',
+        'SMTP_PASS' => '',
+        'FROM_EMAIL' => '',
+        'FROM_NAME' => 'Plataforma UNICALI',
+        'SMTP_DEBUG' => 0,
+        'TIMEOUT' => 25,
+        'ALLOW_SELF_SIGNED' => false,
+    ],
+    $smtp
+);
+
+if ($smtp['FROM_EMAIL'] === '' && $smtp['SMTP_USER'] !== '') {
+    $smtp['FROM_EMAIL'] = $smtp['SMTP_USER'];
+}
+
+if ($smtp['FROM_EMAIL'] === '') {
+    throw new RuntimeException('No se definio FROM_EMAIL en la configuracion SMTP.');
+}
 // Ajustamos timeout de sockets al valor configurado para evitar esperas eternas en conexiones bloqueadas.
 if (isset($smtp['TIMEOUT'])) {
     ini_set('default_socket_timeout', (string) $smtp['TIMEOUT']);
@@ -40,9 +67,12 @@ function obtener_mailer()
     $mail->Username = $smtp['SMTP_USER'];
     $mail->Password = $smtp['SMTP_PASS'];
 
-    $mail->SMTPSecure = ($smtp['SMTP_SECURE'] === 'tls')
-        ? PHPMailer::ENCRYPTION_STARTTLS
-        : PHPMailer::ENCRYPTION_SMTPS;
+    $secureMode = strtolower((string) $smtp['SMTP_SECURE']);
+    if ($secureMode === 'ssl' || $secureMode === 'smtps') {
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_SMTPS;
+    } else {
+        $mail->SMTPSecure = PHPMailer::ENCRYPTION_STARTTLS;
+    }
 
     $mail->Port = $smtp['SMTP_PORT'];
     $mail->SMTPAutoTLS = false;

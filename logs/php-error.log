@@ -54,3 +54,17 @@ Stack trace:
 [25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 49
 [25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 64
 [25-Mar-2026 03:48:34 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 64
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 36
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 37
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 40
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 41
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 43
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 47
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 49
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 64
+[18-Apr-2026 04:01:39 Europe/Berlin] PHP Warning:  Trying to access array offset on value of type int in C:\xampp\htdocs\especialidad\config_mail.php on line 64
+[18-Apr-2026 04:11:07 Europe/Berlin] PHP Fatal error:  Maximum execution time of 15 seconds exceeded in C:\xampp\htdocs\especialidad\PHPMailer\SMTP.php on line 423
+[18-Apr-2026 04:13:43 Europe/Berlin] PHP Fatal error:  Maximum execution time of 15 seconds exceeded in C:\xampp\htdocs\especialidad\PHPMailer\SMTP.php on line 423
+[18-Apr-2026 04:22:49 Europe/Berlin] Correo capturado en localhost: seguraordonezpaola@gmail.com
+[18-Apr-2026 04:26:29 Europe/Berlin] Correo capturado en localhost: seguraordonezpaola@gmail.com
+[19-Apr-2026 00:59:14 Europe/Berlin] Correo capturado en localhost: seguraordonezpaola@gmail.com
