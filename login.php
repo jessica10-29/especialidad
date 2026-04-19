@@ -44,6 +44,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     $identificador = trim($_POST['identificador']); // Puede ser Email o Cédula
     $password = $_POST['password'];
     $codigo_docente = $_POST['codigo_docente'] ?? '';
+    $rol_seleccionado = $_POST['rol_seleccionado'] ?? 'estudiante';
 
     // Buscar por Email O por Identificación (Cédula/TI)
     $stmt = $conn->prepare("SELECT id, nombre, password, rol FROM usuarios WHERE email = ? OR identificacion = ?");
@@ -149,6 +150,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             <form method="POST" action="">
                 <!-- Token CSRF Oculto -->
                 <input type="hidden" name="csrf_token" value="<?php echo generar_csrf_token(); ?>">
+                <!-- Rol seleccionado -->
+                <input type="hidden" name="rol_seleccionado" value="<?php echo isset($_GET['rol']) ? htmlspecialchars(strtolower($_GET['rol']), ENT_QUOTES, 'UTF-8') : 'estudiante'; ?>">
 
                 <div class="input-group">
                     <label class="input-label">Usuario (Correo o Cédula)</label>
