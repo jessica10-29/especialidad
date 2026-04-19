@@ -14,9 +14,9 @@ $isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual
     || gethostname() === 'JEFFERSON-PC';  // Fallback para hostname local
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
-// Forzar HTTPS: siempre en hosting; en localhost solo si FORZAR_HTTPS=1
+// Forzar HTTPS solo si se habilita explícitamente en la variable de entorno
 $forzarEnv = getenv('FORZAR_HTTPS');
-$forzarHttps = $forzarEnv === '1' ? true : (!$isLocal && $forzarEnv !== '0');
+$forzarHttps = $forzarEnv === '1';
 
 // Configuracion de errores (muestra en local, oculta en produccion)
 ini_set('display_errors', $isLocal ? 1 : 0);
@@ -40,13 +40,14 @@ if (!headers_sent()) {
     header('Permissions-Policy: geolocation=(), camera=(), microphone=()');
 }
 
-// Forzar HTTPS solo si hay certificado activo o se habilita por variable de entorno
-if (!$isLocal && ($httpsActivo || $forzarHttps) && !headers_sent()) {
+// Forzar HTTPS solo si hay certificado activo y si se habilita por variable de entorno
+if (!$isLocal && $httpsActivo && !headers_sent()) {
     header('Strict-Transport-Security: max-age=31536000; includeSubDomains');
-    if (!$httpsActivo) {
-        header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
-        exit;
-    }
+}
+
+if (!$isLocal && $forzarHttps && !$httpsActivo && !headers_sent()) {
+    header('Location: https://' . $_SERVER['HTTP_HOST'] . $_SERVER['REQUEST_URI'], true, 301);
+    exit;
 }
 
 // Cookies de sesion seguras

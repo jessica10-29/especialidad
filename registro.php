@@ -32,9 +32,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $valido = false;
     }
 
-    $regex_segura = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&._-])(?!.*(.)\\1{2}).{8,}$/';
+    $regex_segura = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/';
     if ($valido && !preg_match($regex_segura, $password)) {
-        $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> Usa una contraseña segura: mayúscula, minúscula, número, símbolo (@$!%*?&._-) y sin repetir el mismo carácter tres veces seguidas.</div>';
+        $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> La contraseña debe incluir al menos: 1 mayúscula, 1 minúscula y 1 número. Ejemplo: "MiPass123"</div>';
         $valido = false;
     }
 
@@ -291,6 +291,21 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             object-fit: cover;
             border: 2px solid rgba(255, 255, 255, 0.1);
         }
+
+        /* Estilos para requisitos de contraseña */
+        #password-requirements {
+            background: rgba(0, 0, 0, 0.2);
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            margin-top: 8px;
+        }
+
+        #password-requirements div {
+            margin: 2px 0;
+            font-size: 0.75rem;
+            transition: color 0.2s ease;
+        }
     </style>
     <script>
         function toggleCodigo(val) {
@@ -328,6 +343,52 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             if (pass === pass2) { badge.style.color = '#34d399'; badge.textContent = 'Coinciden'; }
             else { badge.style.color = '#fb7185'; badge.textContent = 'No coinciden'; }
         }
+        function validarPassword() {
+            const pass = document.getElementById('password').value;
+            const reqs = document.getElementById('password-requirements');
+            const lengthReq = document.getElementById('req-length');
+            const upperReq = document.getElementById('req-uppercase');
+            const lowerReq = document.getElementById('req-lowercase');
+            const numberReq = document.getElementById('req-number');
+
+            if (pass.length === 0) {
+                reqs.style.display = 'none';
+                return;
+            }
+
+            reqs.style.display = 'block';
+
+            // Validar cada requisito
+            const hasLength = pass.length >= 8;
+            const hasUpper = /[A-Z]/.test(pass);
+            const hasLower = /[a-z]/.test(pass);
+            const hasNumber = /\d/.test(pass);
+
+            lengthReq.style.color = hasLength ? '#34d399' : '#fb7185';
+            lengthReq.innerHTML = (hasLength ? '✅' : '❌') + ' Mínimo 8 caracteres';
+
+            upperReq.style.color = hasUpper ? '#34d399' : '#fb7185';
+            upperReq.innerHTML = (hasUpper ? '✅' : '❌') + ' Una mayúscula';
+
+            lowerReq.style.color = hasLower ? '#34d399' : '#fb7185';
+            lowerReq.innerHTML = (hasLower ? '✅' : '❌') + ' Una minúscula';
+
+            numberReq.style.color = hasNumber ? '#34d399' : '#fb7185';
+            numberReq.innerHTML = (hasNumber ? '✅' : '❌') + ' Un número';
+
+            // También validar coincidencia si hay confirmación
+            validarCoincidencia();
+        }
+
+        // Inicializar validación de contraseña al cargar la página
+        document.addEventListener('DOMContentLoaded', function() {
+            const passwordField = document.getElementById('password');
+            if (passwordField) {
+                passwordField.addEventListener('input', validarPassword);
+                // Ejecutar una vez para mostrar requisitos iniciales si hay valor
+                if (passwordField.value) validarPassword();
+            }
+        });
     </script>
 </head>
 
@@ -473,11 +534,17 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label class="input-label">Contraseña</label>
                             <div class="input-wrapper">
                                 <input type="password" name="password" id="password" class="input-field"
-                                    placeholder="Mínimo 8 caracteres" required oninput="validarCoincidencia()"
-                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&._-])(?!.*(.)\\1{2}).{8,}"
-                                    title="Debe tener 8+ caracteres, con mayúscula, minúscula, número, símbolo (@$!%*?&._-) y sin 3 caracteres iguales seguidos.">
+                                    placeholder="Ej: MiPass123" required oninput="validarPassword()"
+                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}"
+                                    title="Mínimo 8 caracteres con al menos 1 mayúscula, 1 minúscula y 1 número">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password', this)"><i class="fa-solid fa-eye"></i></button>
+                            </div>
+                            <div id="password-requirements" style="font-size: 0.75rem; margin-top: 6px; display: none;">
+                                <div id="req-length" style="color: #fb7185;">❌ Mínimo 8 caracteres</div>
+                                <div id="req-uppercase" style="color: #fb7185;">❌ Una mayúscula</div>
+                                <div id="req-lowercase" style="color: #fb7185;">❌ Una minúscula</div>
+                                <div id="req-number" style="color: #fb7185;">❌ Un número</div>
                             </div>
                         </div>
                         <div class="input-group">
@@ -485,8 +552,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="input-wrapper">
                                 <input type="password" name="password_confirm" id="password_confirm" class="input-field"
                                     placeholder="Repite tu contraseña" required oninput="validarCoincidencia()"
-                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d)(?=.*[@$!%*?&._-])(?!.*(.)\\1{2}).{8,}"
-                                    title="Debe tener 8+ caracteres, con mayúscula, minúscula, número, símbolo (@$!%*?&._-) y sin 3 caracteres iguales seguidos.">
+                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}"
+                                    title="Mínimo 8 caracteres con al menos 1 mayúscula, 1 minúscula y 1 número">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password_confirm', this)"><i
                                         class="fa-solid fa-eye"></i></button>
