@@ -73,12 +73,14 @@ $config = require $configPath;
 $usarLocal = ($isLocal || getenv('FORZAR_LOCAL_DB') === '1') && getenv('FORZAR_LOCAL_DB') !== '0';
 
 if ($usarLocal) {
-    $host = $config['DB_HOST_LOCAL'] ?? '127.0.0.1';
+    $host = $config['DB_HOST_LOCAL'] ?? 'localhost';
+    $port = intval($config['DB_PORT_LOCAL'] ?? 3306);
     $user = $config['DB_USER_LOCAL'] ?? 'root';
     $pass = $config['DB_PASS_LOCAL'] ?? '';
     $db   = $config['DB_NAME_LOCAL'] ?? 'universidad';
 } else {
     $host = $config['DB_HOST'] ?? '';
+    $port = intval($config['DB_PORT'] ?? 3306);
     $user = $config['DB_USER'] ?? '';
     $pass = $config['DB_PASS'] ?? '';
     $db   = $config['DB_NAME'] ?? '';
@@ -86,7 +88,7 @@ if ($usarLocal) {
 
 // Evitar excepciones fatales de mysqli y manejar manualmente
 mysqli_report(MYSQLI_REPORT_OFF);
-$conn = @new mysqli($host, $user, $pass, $db);
+$conn = @new mysqli($host, $user, $pass, $db, $port);
 
 if ($conn->connect_errno) {
     error_log("Error de conexion a BD ({$host}): " . $conn->connect_error);
@@ -107,7 +109,8 @@ if ($conn->connect_errno) {
     echo '<h1>Servicio temporalmente no disponible</h1>';
     echo '<p>' . htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') . '</p>';
     if ($isLocal) {
-        echo '<small>Hint: Arranca MySQL en XAMPP y confirma los datos en secure/config.php o variables DB_*_LOCAL.</small>';
+        echo '<small>Hint: Arranca MySQL en XAMPP y confirma los datos en secure/config.php o variables DB_*_LOCAL.';
+        echo ' Error de conexión: ' . htmlspecialchars($conn->connect_error, ENT_QUOTES, 'UTF-8') . '</small>';
     }
     echo '</div></body></html>';
     exit;
