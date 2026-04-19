@@ -41,72 +41,75 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
     }
 
     // Limpiar datos
-    $identificador = trim($_POST['identificador']); // Puede ser Email o Cédula
-    $password = $_POST['password'];
+    $identificador = trim($_POST['identificador'] ?? '');
+    $password = $_POST['password'] ?? '';
     $codigo_docente = $_POST['codigo_docente'] ?? '';
-    $rol_seleccionado = $_POST['rol_seleccionado'] ?? 'estudiante';
 
-    // Buscar por Email O por Identificación (Cédula/TI)
-    $stmt = $conn->prepare("SELECT id, nombre, password, rol FROM usuarios WHERE email = ? OR identificacion = ?");
-    $stmt->bind_param("ss", $identificador, $identificador);
-    $stmt->execute();
-    $resultado = $stmt->get_result();
-
-    if ($resultado->num_rows === 1) {
-
-        $usuario = $resultado->fetch_assoc();
-        // Si el usuario es profesor, aseguramos que el campo de código aparezca en el formulario
-        $mostrarCodigoDocente = strtolower(trim($usuario['rol'])) === 'profesor';
-        $login_ok = false;
-
-        // 🔐 1. Verificar contraseña hasheada
-        if (password_verify($password, $usuario['password'])) {
-            $login_ok = true;
-        }
-        // 🔄 2. Contraseña antigua en texto plano
-        else if ($password === $usuario['password']) {
-            $login_ok = true;
-
-            // Convertir a hash automáticamente
-            $nuevo_hash = password_hash($password, PASSWORD_BCRYPT);
-            $upd = $conn->prepare("UPDATE usuarios SET password=? WHERE id=?");
-            $upd->bind_param("si", $nuevo_hash, $usuario['id']);
-            $upd->execute();
-            $upd->close();
-        }
-
-        // ❌ Contraseña incorrecta
-        if (!$login_ok) {
-            $error = "La contraseña ingresada es incorrecta.";
-        }
-        // 👨‍🏫 Validar código docente SOLO si es profesor
-        else if (
-            strtolower(trim($usuario['rol'])) === 'profesor'
-            && trim(strtoupper($codigo_docente)) !== 'UNICALI_DOCENTE'
-        ) {
-            $error = "Acceso docente denegado. Código incorrecto.";
-        }
-        // ✅ Login exitoso
-        else {
-            // Prevenir Session Fixation
-            session_regenerate_id(true);
-
-            $_SESSION['usuario_id'] = $usuario['id'];
-            $_SESSION['nombre'] = $usuario['nombre'];
-            $_SESSION['rol'] = strtolower(trim($usuario['rol']));
-
-            if ($_SESSION['rol'] === 'profesor') {
-                header("Location: dashboard_profesor.php");
-            } else {
-                header("Location: dashboard_estudiante.php");
-            }
-            exit;
-        }
+    // Validar que los campos no estén vacíos
+    if (empty($identificador) || empty($password)) {
+        $error = "Por favor completa todos los campos obligatorios.";
     } else {
-        $error = "No existe una cuenta con esos datos (Correo o Cédula).";
-    }
+        // Buscar por Email O por Identificación (Cédula/TI)
+        $stmt = $conn->prepare("SELECT id, nombre, password, rol FROM usuarios WHERE email = ? OR identificacion = ?");
+        
+        if ($stmt) {
+            $stmt->bind_param("ss", $identificador, $identificador);
+            $stmt->execute();
+            $resultado = $stmt->get_result();
 
-    $stmt->close();
+            if ($resultado->num_rows === 1) {
+                $usuario = $resultado->fetch_assoc();
+                $mostrarCodigoDocente = strtolower(trim($usuario['rol'])) === 'profesor';
+                $login_ok = false;
+
+                // 🔐 1. Verificar contraseña hasheada
+                if (password_verify($password, $usuario['password'])) {
+                    $login_ok = true;
+                }
+                // 🔄 2. Contraseña antigua en texto plano
+                else if ($password === $usuario['password']) {
+                    $login_ok = true;
+                    // Convertir a hash automáticamente
+                    $nuevo_hash = password_hash($password, PASSWORD_BCRYPT);
+                    $upd = $conn->prepare("UPDATE usuarios SET password=? WHERE id=?");
+                    $upd->bind_param("si", $nuevo_hash, $usuario['id']);
+                    $upd->execute();
+                    $upd->close();
+                }
+
+                // ❌ Contraseña incorrecta
+                if (!$login_ok) {
+                    $error = "La contraseña ingresada es incorrecta.";
+                }
+                // 👨‍🏫 Validar código docente SOLO si es profesor
+                else if (
+                    strtolower(trim($usuario['rol'])) === 'profesor'
+                    && trim(strtoupper($codigo_docente)) !== 'UNICALI_DOCENTE'
+                ) {
+                    $error = "Acceso docente denegado. Código incorrecto.";
+                }
+                // ✅ Login exitoso
+                else {
+                    session_regenerate_id(true);
+                    $_SESSION['usuario_id'] = $usuario['id'];
+                    $_SESSION['nombre'] = $usuario['nombre'];
+                    $_SESSION['rol'] = strtolower(trim($usuario['rol']));
+
+                    if ($_SESSION['rol'] === 'profesor') {
+                        header("Location: dashboard_profesor.php");
+                    } else {
+                        header("Location: dashboard_estudiante.php");
+                    }
+                    exit;
+                }
+            } else {
+                $error = "No existe una cuenta con esos datos (Correo o Cédula).";
+            }
+            $stmt->close();
+        } else {
+            $error = "Error en la consulta a la base de datos. Intenta más tarde.";
+        }
+    }
 }
 ?>
 

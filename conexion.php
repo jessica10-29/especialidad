@@ -10,7 +10,8 @@ if (!headers_sent()) {
 $hostActual  = $_SERVER['HTTP_HOST'] ?? '';
 // Considera local también redes privadas (LAN) para no forzar HTTPS cuando no hay certificado
 $isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1
-    || preg_match('/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/', $hostActual) === 1;
+    || preg_match('/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/', $hostActual) === 1
+    || gethostname() === 'JEFFERSON-PC';  // Fallback para hostname local
 $httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
     (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
 // Forzar HTTPS: siempre en hosting; en localhost solo si FORZAR_HTTPS=1
@@ -84,6 +85,15 @@ if ($usarLocal) {
     $user = $config['DB_USER'] ?? '';
     $pass = $config['DB_PASS'] ?? '';
     $db   = $config['DB_NAME'] ?? '';
+    
+    // FALLBACK: Si credenciales remotas están vacías, usa las locales
+    if (empty($host) || empty($user) || empty($db)) {
+        $host = $config['DB_HOST_LOCAL'] ?? 'localhost';
+        $port = intval($config['DB_PORT_LOCAL'] ?? 3306);
+        $user = $config['DB_USER_LOCAL'] ?? 'root';
+        $pass = $config['DB_PASS_LOCAL'] ?? '';
+        $db   = $config['DB_NAME_LOCAL'] ?? 'universidad';
+    }
 }
 
 // Evitar excepciones fatales de mysqli y manejar manualmente
