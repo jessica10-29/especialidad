@@ -62,7 +62,7 @@ CREATE TABLE IF NOT EXISTS notas (
     id INT AUTO_INCREMENT PRIMARY KEY,
     matricula_id INT NOT NULL,
     corte VARCHAR(50) NOT NULL, -- Ej: 'Parcial 1'
-    valor DECIMAL(4, 2) NOT NULL CHECK (valor >= 0 AND valor <= 5), -- Validación básica SQL
+    valor DECIMAL(4, 2) NOT NULL, -- El rango 0..5 se valida en la aplicación para compatibilidad con hosting
     observacion TEXT,
     created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
     updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
