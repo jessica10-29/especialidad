@@ -16,17 +16,13 @@ ini_set('max_execution_time', 300);
 // Permitir acceso desde CLI o con token
 if (php_sapi_name() !== 'cli') {
     header('Content-Type: application/json; charset=UTF-8');
-    
-    $tokenSecreto = getenv('MAIL_QUEUE_TOKEN') ?: 'DESARROLLO_LOCAL_2025';
-    $tokenEnviado = $_GET['token'] ?? $_POST['token'] ?? '';
-    
-    if ($tokenEnviado !== $tokenSecreto) {
-        http_response_code(403);
-        die(json_encode(['status' => 'error', 'mensaje' => 'Acceso denegado']));
-    }
 }
 
 require_once 'conexion.php';
+if (php_sapi_name() !== 'cli') {
+    exigir_herramienta_local('El envio forzado de correos');
+    validar_token_mantenimiento_en_peticion();
+}
 require_once 'config_mail.php';
 
 // Log

@@ -163,7 +163,7 @@ if ($rol == 'profesor' && (empty($u['codigo_profesor']) || $u['codigo_profesor']
                         </a>
                     </div>
                 <?php endif; ?>
-                <a href="logout.php" class="nav-link" style="margin-top: auto; color: #f43f5e;">
+                <a href="logout.php" class="nav-link nav-link-danger" style="margin-top: auto;">
                     <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                 </a>
             </nav>

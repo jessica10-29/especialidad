@@ -2,6 +2,7 @@
 // actualizar_sistema_academico.php - Script para actualizar la BD con Periodos y Observaciones
 
 require_once 'conexion.php';
+exigir_herramienta_local('La actualizacion del sistema academico');
 
 $queries = [
     // 1. Tabla de Periodos de Edición

@@ -4,7 +4,11 @@ require_once 'conexion.php';
 
 $error = '';
 // Mostrar campo de código docente solo cuando aplica (rol profesor).
-$mostrarCodigoDocente = isset($_GET['rol']) && strtolower($_GET['rol']) === 'profesor';
+$rolSeleccionado = strtolower(trim((string)($_POST['rol_seleccionado'] ?? $_GET['rol'] ?? 'estudiante')));
+if (!in_array($rolSeleccionado, ['estudiante', 'profesor'], true)) {
+    $rolSeleccionado = 'estudiante';
+}
+$mostrarCodigoDocente = $rolSeleccionado === 'profesor';
 
 // Cabeceras adicionales orientadas al navegador para esta página
 if (!headers_sent()) {
@@ -59,7 +63,6 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
             if ($resultado->num_rows === 1) {
                 $usuario = $resultado->fetch_assoc();
-                $mostrarCodigoDocente = strtolower(trim($usuario['rol'])) === 'profesor';
                 $login_ok = false;
 
                 // 🔐 1. Verificar contraseña hasheada
@@ -150,11 +153,11 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 </div>
             <?php endif; ?>
 
-            <form method="POST" action="">
+            <form method="POST" action="login.php?rol=<?php echo urlencode($rolSeleccionado); ?>">
                 <!-- Token CSRF Oculto -->
                 <input type="hidden" name="csrf_token" value="<?php echo generar_csrf_token(); ?>">
                 <!-- Rol seleccionado -->
-                <input type="hidden" name="rol_seleccionado" value="<?php echo isset($_GET['rol']) ? htmlspecialchars(strtolower($_GET['rol']), ENT_QUOTES, 'UTF-8') : 'estudiante'; ?>">
+                <input type="hidden" name="rol_seleccionado" value="<?php echo htmlspecialchars($rolSeleccionado, ENT_QUOTES, 'UTF-8'); ?>">
 
                 <div class="input-group">
                     <label class="input-label">Usuario (Correo o Cédula)</label>

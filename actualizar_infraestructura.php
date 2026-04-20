@@ -1,5 +1,6 @@
 <?php
 require_once 'conexion.php';
+exigir_herramienta_local('La actualizacion de infraestructura');
 
 echo "<h1>Actualizando Infraestructura Académica...</h1>";
 

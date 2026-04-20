@@ -10,9 +10,11 @@
  */
 
 // Solo en localhost (en producción usar cron jobs o webhooks)
-$isLocal = isset($_SERVER['HTTP_HOST']) 
-    && (stripos($_SERVER['HTTP_HOST'], 'localhost') !== false 
-        || stripos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false);
+$isLocal = function_exists('es_peticion_local')
+    ? es_peticion_local()
+    : (isset($_SERVER['HTTP_HOST'])
+        && (stripos($_SERVER['HTTP_HOST'], 'localhost') !== false
+            || stripos($_SERVER['HTTP_HOST'], '127.0.0.1') !== false));
 
 if (!$isLocal) {
     return; // No ejecutar en producción
@@ -31,10 +33,16 @@ if ($lastProcess && ($now - (int)$lastProcess) < 300) {
 @file_put_contents($cacheFile, $now);
 
 // Ejecutar procesador en background
-$token = getenv('MAIL_QUEUE_TOKEN') ?: 'DESARROLLO_LOCAL_2025';
-$protocolo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-$host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-$url = "{$protocolo}://{$host}/especialidad/enviar_cola_correos.php?token=" . urlencode($token);
+$token = function_exists('obtener_token_mantenimiento')
+    ? obtener_token_mantenimiento()
+    : (getenv('MAIL_QUEUE_TOKEN') ?: 'DESARROLLO_LOCAL_2025');
+
+$baseUrl = function_exists('construir_base_url')
+    ? rtrim(construir_base_url(), '/')
+    : (((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http')
+        . '://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/especialidad');
+
+$url = $baseUrl . '/enviar_cola_correos.php?token=' . urlencode($token);
 
 // Ejecutar en background (sin esperar respuesta)
 $context = stream_context_create([

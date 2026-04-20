@@ -1,11 +1,11 @@
 ﻿<?php
 require_once 'conexion.php';
 require_once 'funciones_mail.php';
-// Asegurar UTF-8 y mostrar errores en esta página (evita pantalla en blanco si algo falla)
+// Asegurar UTF-8 y registrar errores sin exponer detalles en producción.
 if (!headers_sent()) {
     header('Content-Type: text/html; charset=UTF-8');
 }
-ini_set('display_errors', 1);
+ini_set('display_errors', $isLocal ? '1' : '0');
 error_reporting(E_ALL);
 set_time_limit(60);
 
@@ -20,6 +20,9 @@ register_shutdown_function(function () use ($fatalLog) {
 });
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (!verificar_csrf_token($_POST['csrf_token'] ?? '')) {
+        $error_envio = 'Solicitud invalida. Recarga la pagina e intenta de nuevo.';
+    } else {
     // Log ligero para evitar pantalla en blanco si el hosting suprime errores
     $logFile = __DIR__ . '/logs/mail-send.log';
     $log = function ($msg) use ($logFile) {
@@ -28,6 +31,18 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
     try {
         $search = trim($_POST['email'] ?? '');
+        $ip = $_SERVER['REMOTE_ADDR'] ?? 'desconocida';
+        $rateDir = __DIR__ . '/logs/reset-rate';
+        if (!is_dir($rateDir)) {
+            @mkdir($rateDir, 0755, true);
+        }
+        $rateFile = $rateDir . '/' . sha1($ip) . '.lock';
+        if (is_file($rateFile) && (time() - filemtime($rateFile)) < 60) {
+            $log('Rate limit activado para recuperación desde IP ' . $ip);
+            header('Location: recover_password.php?ok=1');
+            exit;
+        }
+        @touch($rateFile);
 
         // Buscar usuario por Email o Identificacion
         $stmt = $conn->prepare('SELECT id, email, nombre FROM usuarios WHERE email = ? OR identificacion = ?');
@@ -73,11 +88,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('No se pudo guardar el token de recuperacion.');
             }
 
-            $protocol = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ? 'https' : 'http';
-            $host = $_SERVER['HTTP_HOST'] ?? 'localhost';
-            $basePath = rtrim(str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? '/')), '/');
-            $basePath = ($basePath === '' || $basePath === '.') ? '' : $basePath;
-            $link = sprintf('%s://%s%s/reset_password.php?token=%s', $protocol, $host, $basePath, urlencode($token));
+            $link = rtrim(construir_base_url(), '/') . '/reset_password.php?token=' . urlencode($token);
 
             $log('Agregando correo a cola para ' . $email);
 
@@ -91,12 +102,14 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 throw new Exception('No se pudo procesar el envío del correo. Intenta más tarde.');
             }
         } else {
-            $safeSearch = htmlspecialchars($search, ENT_QUOTES, 'UTF-8');
-            $error_envio = "El correo o identificacion '$safeSearch' no esta registrado.";
+            $log('Solicitud de recuperacion para usuario no encontrado: ' . $search);
+            header('Location: recover_password.php?ok=1');
+            exit;
         }
     } catch (Exception $e) {
         $log('Excepcion: ' . $e->getMessage());
-        $error_envio = 'No pudimos procesar tu solicitud: ' . htmlspecialchars($e->getMessage(), ENT_QUOTES, 'UTF-8');
+        $error_envio = 'No pudimos procesar tu solicitud en este momento. Intenta nuevamente en unos minutos.';
+    }
     }
 }
 ?>
@@ -141,6 +154,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="POST">
+                <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generar_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                 <div class="input-group">
                     <label class="input-label">Correo o Identificaci&#243;n (C&#233;dula/TI)</label>
                     <div class="input-wrapper">

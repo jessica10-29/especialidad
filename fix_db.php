@@ -1,5 +1,6 @@
 <?php
 require_once 'conexion.php';
+exigir_herramienta_local('La reparacion de base de datos');
 
 echo "<h2>Actualizando base de datos...</h2>";
 

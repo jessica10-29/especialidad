@@ -8,6 +8,7 @@
 header('Content-Type: application/json; charset=UTF-8');
 
 require_once 'conexion.php';
+exigir_herramienta_local('La prueba SMTP');
 require_once 'config_mail.php';
 
 try {

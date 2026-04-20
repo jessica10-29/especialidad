@@ -1,6 +1,12 @@
 # Seguridad y forzado de HTTPS (puede forzar tambiÃ©n en localhost)
 RewriteEngine On
 
+# Bloquear acceso directo a archivos/carpetas ocultos, excepto ACME/.well-known
+RewriteRule "(^|/)\.(?!well-known(?:/|$))" - [F,L,NC]
+
+# Bloquear carpetas internas que nunca deben servirse públicamente
+RewriteRule "^(logs|secure|\.git|\.github|\.vscode)(?:/|$)" - [F,L,NC]
+
 # Marcar entorno local para cabeceras condicionales
 SetEnvIf Host "^(localhost|127\\.0\\.0\\.1)(:\\d+)?$" IS_LOCAL=1
 
@@ -29,9 +35,15 @@ RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]
 
 # Evitar exposición de archivos sensibles / de prueba
 Options -Indexes
-<FilesMatch "(?i)^(test_|debug_|probador_completo|temp_diag|fix_db).+\.php$">
+<FilesMatch "(?i)^(test_|debug_|probador_completo|temp_diag|fix_db|doctor_|actualizar_|finalizar_actualizacion_).+\.php$">
   Require all denied
 </FilesMatch>
-<FilesMatch "(?i)\.(sql|zip|rar|7z|bak)$">
+<FilesMatch "(?i)^(DIAGNOSTICO_CORREOS|PRUEBA_COLA_CORREOS|enviar_test_smtp|verificar_chrome|admin_cola_correos|forzar_envio_correos)\.(php|html)$">
+  Require all denied
+</FilesMatch>
+<Files "CONTROL_CORREOS.html">
+  Require all denied
+</Files>
+<FilesMatch "(?i)\.(sql|zip|rar|7z|bak|md|log|ini|env|ya?ml|dist|ps1|bat|cmd)$">
   Require all denied
 </FilesMatch>

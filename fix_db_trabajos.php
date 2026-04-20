@@ -1,5 +1,6 @@
 <?php
 require_once 'conexion.php';
+exigir_herramienta_local('La migracion de trabajos');
 
 // 1. Crear tabla de Actividades (Tareas)
 $sql1 = "CREATE TABLE IF NOT EXISTS actividades (

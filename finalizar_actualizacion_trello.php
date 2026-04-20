@@ -1,6 +1,7 @@
 <?php
 // finalizar_actualizacion_trello.php - Último paso para completar todas las funciones de Trello
 require_once 'conexion.php';
+exigir_herramienta_local('La migracion final del sistema');
 
 $queries = [
     // 1. Columnas para Recuperación de Contraseña
@@ -27,9 +28,7 @@ foreach ($queries as $q) {
 // 4. Crear un Admin por defecto para probar (opcional, pero útil para gestionar periodos)
 $check_admin = $conn->query("SELECT id FROM usuarios WHERE rol = 'admin' LIMIT 1");
 if ($check_admin->num_rows == 0) {
-    $pass = password_hash('admin123', PASSWORD_DEFAULT);
-    $conn->query("INSERT INTO usuarios (nombre, email, password, rol) VALUES ('Administrador', 'admin@unicali.edu.co', '$pass', 'admin')");
-    echo "<p><b>Nota:</b> Se ha creado un usuario administrador: <b>admin@unicali.edu.co</b> con clave <b>admin123</b> para que gestiones los periodos.</p>";
+    echo "<p><b>Nota de seguridad:</b> No se creó ningún administrador por defecto. Crea el usuario admin manualmente desde un entorno controlado.</p>";
 }
 
 echo "<hr><p><a href='index.php'>Ir al Login</a></p>";

@@ -55,7 +55,7 @@
 
                 <div class="security-badge" style="margin-top: 30px;">
                     <i class="fa-solid fa-lock"></i>
-                    <span>Portal Seguro Unicali (Certificado SSL Activo)</span>
+                    <span><?php echo !empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off' ? 'Portal Seguro Unicali (HTTPS activo)' : 'Portal Seguro Unicali'; ?></span>
                 </div>
             </div>
         </div>

@@ -17,4 +17,8 @@ return [
     'DB_USER' => getenv('DB_USER') ?: '',
     'DB_PASS' => getenv('DB_PASS') ?: '',
     'DB_NAME' => getenv('DB_NAME') ?: '',
+    // Opcional para hosting público si el panel no soporta variables de entorno
+    'APP_URL' => getenv('APP_URL') ?: '',
+    'PUBLIC_BASE_URL' => getenv('PUBLIC_BASE_URL') ?: '',
+    'MAIL_QUEUE_TOKEN' => getenv('MAIL_QUEUE_TOKEN') ?: '',
 ];

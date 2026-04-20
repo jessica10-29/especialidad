@@ -1,6 +1,7 @@
 <?php
 // doctor_periodos.php - Reparador automático del sistema de periodos
 require_once 'conexion.php';
+exigir_herramienta_local('El doctor del sistema academico');
 
 echo "<h1>🩺 Doctor del Sistema Académico</h1>";
 

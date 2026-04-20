@@ -336,6 +336,16 @@ h3 { font-size: 1.3rem; }
 
 .nav-link:hover { background: rgba(255, 255, 255, 0.05); color: white; }
 
+.nav-link-danger,
+.nav-link-danger i {
+    color: #f43f5e !important;
+}
+
+.nav-link-danger:hover,
+.nav-link-danger:hover i {
+    color: #fb7185 !important;
+}
+
 .nav-link.active {
     background: rgba(167, 139, 250, 0.15);
     color: var(--primary);

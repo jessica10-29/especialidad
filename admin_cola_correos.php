@@ -9,15 +9,10 @@
 header('Content-Type: text/html; charset=UTF-8');
 
 // Verificación de token
-$tokenSecreto = getenv('MAIL_QUEUE_TOKEN') ?: 'DESARROLLO_LOCAL_2025';
-$tokenEnviado = $_GET['token'] ?? $_POST['token'] ?? '';
-
-if ($tokenEnviado !== $tokenSecreto) {
-    http_response_code(403);
-    die('<h1>Acceso Denegado</h1>');
-}
-
 require_once 'conexion.php';
+exigir_herramienta_local('El panel de cola de correos');
+$tokenSecreto = validar_token_mantenimiento_en_peticion();
+$tokenEnviado = $_GET['token'] ?? $_POST['token'] ?? '';
 
 // Crear tabla si no existe
 $conn->query("

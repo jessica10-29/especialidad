@@ -160,7 +160,7 @@ $estudiantes = $conn->query("
                 <a href="perfil.php" class="nav-link">
                     <i class="fa-solid fa-gear"></i> Configuración
                 </a>
-                <a href="logout.php" class="nav-link" style="margin-top: auto; color: var(--danger);">
+                <a href="logout.php" class="nav-link nav-link-danger" style="margin-top: auto;">
                     <i class="fa-solid fa-right-from-bracket"></i> Cerrar Sesión
                 </a>
             </nav>

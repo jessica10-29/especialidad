@@ -82,9 +82,14 @@ function agregar_correo_a_cola($email, $nombre, $asunto, $contenido, $tipo = 'ot
  */
 function procesar_cola_correos_inmediatamente()
 {
-    $token = getenv('MAIL_QUEUE_TOKEN') ?: 'DESARROLLO_LOCAL_2025';
+    $token = obtener_token_mantenimiento();
+    if ($token === '' || (!es_peticion_local() && token_mantenimiento_inseguro($token))) {
+        return ['status' => 'error', 'mensaje' => 'MAIL_QUEUE_TOKEN no esta configurado de forma segura.'];
+    }
+
+    $baseUrl = rtrim(construir_base_url(), '/');
     $resultado = @file_get_contents(
-        'http://' . ($_SERVER['HTTP_HOST'] ?? 'localhost') . '/enviar_cola_correos.php?token=' . urlencode($token),
+        $baseUrl . '/enviar_cola_correos.php?token=' . urlencode($token),
         false,
         stream_context_create([
             'http' => ['timeout' => 30]
@@ -157,7 +162,7 @@ function enviar_correo_recuperacion($email, $nombre, $link)
                 
                 <p style='font-size: 0.85em; color: #999;'>
                     Este correo fue enviado automáticamente. Respuestas a este correo no serán revisadas.<br>
-                    <a href='https://unicalisegura.com' style='color: #667eea; text-decoration: none;'>Visita nuestro portal</a>
+                    <a href='" . htmlspecialchars(rtrim(construir_base_url(), '/'), ENT_QUOTES, 'UTF-8') . "' style='color: #667eea; text-decoration: none;'>Visita nuestro portal</a>
                 </p>
             </div>
         </div>

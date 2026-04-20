@@ -8,9 +8,12 @@
 
 header('Content-Type: text/html; charset=UTF-8');
 
+require_once 'conexion.php';
+exigir_herramienta_local('El diagnostico de correos');
+
 // Verificación de token
-$tokenSecreto = getenv('MAIL_QUEUE_TOKEN') ?: 'DESARROLLO_LOCAL_2025';
 $tokenEnviado = $_GET['token'] ?? $_POST['token'] ?? '';
+$tokenSecreto = validar_token_mantenimiento_en_peticion();
 
 if ($tokenEnviado !== $tokenSecreto) {
     http_response_code(403);

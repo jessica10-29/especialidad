@@ -18,16 +18,11 @@
 set_time_limit(120);
 ini_set('max_execution_time', 120);
 
-// Prevenir que se llame sin token
-$tokenSecreto = getenv('MAIL_QUEUE_TOKEN') ?: 'DESARROLLO_LOCAL_2025';
-$tokenEnviado = $_GET['token'] ?? $_POST['token'] ?? '';
-
-if ($tokenEnviado !== $tokenSecreto && php_sapi_name() !== 'cli') {
-    http_response_code(403);
-    die('Acceso denegado');
-}
-
 require_once 'conexion.php';
+
+if (php_sapi_name() !== 'cli') {
+    validar_token_mantenimiento_en_peticion();
+}
 
 // Log de procesos
 $logFile = __DIR__ . '/logs/mail-queue.log';

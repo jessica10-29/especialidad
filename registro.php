@@ -32,7 +32,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
         $valido = false;
     }
 
-    $regex_segura = '/^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,}$/';
+    $regex_segura = '/^(?=.*[a-záéíóúñü])(?=.*[A-ZÁÉÍÓÚÑÜ])(?=.*\d).{8,}$/u';
     if ($valido && !preg_match($regex_segura, $password)) {
         $mensaje = '<div class="alert-error"><i class="fa-solid fa-triangle-exclamation"></i> La contraseña debe incluir al menos: 1 mayúscula, 1 minúscula y 1 número. Ejemplo: "MiPass123"</div>';
         $valido = false;
@@ -360,8 +360,8 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
             // Validar cada requisito
             const hasLength = pass.length >= 8;
-            const hasUpper = /[A-Z]/.test(pass);
-            const hasLower = /[a-z]/.test(pass);
+            const hasUpper = /[A-ZÁÉÍÓÚÑÜ]/.test(pass);
+            const hasLower = /[a-záéíóúñü]/.test(pass);
             const hasNumber = /\d/.test(pass);
 
             lengthReq.style.color = hasLength ? '#34d399' : '#fb7185';
@@ -420,7 +420,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
                 <div class="feature-list" style="margin-top:14px;">
                     <div class="mini-card">
-                        <strong><i class="fa-solid fa-lock"></i> SSL Activo</strong>
+                        <strong><i class="fa-solid fa-lock"></i> Conexión protegida</strong>
                         <span style="color:#cbd5e1;">Conexiones cifradas extremo a extremo.</span>
                     </div>
                     <div class="mini-card">
@@ -534,8 +534,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <label class="input-label">Contraseña</label>
                             <div class="input-wrapper">
                                 <input type="password" name="password" id="password" class="input-field"
-                                    placeholder="Ej: MiPass123" required oninput="validarPassword()"
-                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}"
+                                    placeholder="Ej: MiPass123" required minlength="8" oninput="validarPassword()"
                                     title="Mínimo 8 caracteres con al menos 1 mayúscula, 1 minúscula y 1 número">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password', this)"><i class="fa-solid fa-eye"></i></button>
@@ -552,7 +551,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                             <div class="input-wrapper">
                                 <input type="password" name="password_confirm" id="password_confirm" class="input-field"
                                     placeholder="Repite tu contraseña" required oninput="validarCoincidencia()"
-                                    pattern="(?=.*[a-z])(?=.*[A-Z])(?=.*\\d).{8,}"
                                     title="Mínimo 8 caracteres con al menos 1 mayúscula, 1 minúscula y 1 número">
                                 <button type="button" class="password-toggle"
                                     onclick="togglePassword('password_confirm', this)"><i

@@ -19,10 +19,13 @@ $forzarEnv = getenv('FORZAR_HTTPS');
 $forzarHttps = $forzarEnv === '1';
 
 // Configuracion de errores (muestra en local, oculta en produccion)
+@ini_set('expose_php', '0');
 ini_set('display_errors', $isLocal ? 1 : 0);
 ini_set('display_startup_errors', 0);
 error_reporting(E_ALL);
 ini_set('log_errors', 1);
+ini_set('session.use_strict_mode', '1');
+ini_set('session.use_only_cookies', '1');
 
 // Asegurar carpeta de logs y registrar en archivo
 $logDir = __DIR__ . '/logs';
@@ -33,6 +36,7 @@ ini_set('error_log', $logDir . '/php-error.log');
 
 // === Cabeceras de seguridad === (solo si no hay salida previa)
 if (!headers_sent()) {
+    header_remove('X-Powered-By');
     header('X-Content-Type-Options: nosniff');
     header('X-Frame-Options: SAMEORIGIN');
     header('X-XSS-Protection: 1; mode=block');
@@ -342,9 +346,18 @@ function validar_pdf_seguro($rutaArchivo, &$error = null, $maxBytes = null)
  */
 function construir_base_url()
 {
+    global $config;
+
     $envUrl = getenv('APP_URL') ?: getenv('PUBLIC_BASE_URL');
     if (!empty($envUrl)) {
         return rtrim($envUrl, '/');
+    }
+
+    if (is_array($config)) {
+        $configUrl = trim((string)($config['APP_URL'] ?? $config['PUBLIC_BASE_URL'] ?? ''));
+        if ($configUrl !== '') {
+            return rtrim($configUrl, '/');
+        }
     }
 
     $forwardProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
@@ -393,6 +406,107 @@ function construir_base_url()
     $scriptDir = ($scriptDir === '/' ? '' : $scriptDir);
 
     return "{$protocol}://{$host}{$portPart}{$scriptDir}";
+}
+
+/**
+ * Determina si una IP pertenece a localhost o a una red privada.
+ */
+function es_ip_local_o_privada(?string $ip = null): bool
+{
+    $ip = trim((string)($ip ?? ($_SERVER['REMOTE_ADDR'] ?? '')));
+    if ($ip === '') {
+        return false;
+    }
+
+    if (in_array($ip, ['127.0.0.1', '::1'], true)) {
+        return true;
+    }
+
+    return preg_match('/^(10\.|192\.168\.|172\.(1[6-9]|2[0-9]|3[01])\.)/', $ip) === 1;
+}
+
+/**
+ * Indica si la petición actual proviene del mismo equipo o de la red local.
+ */
+function es_peticion_local(): bool
+{
+    global $isLocal;
+
+    if (!empty($isLocal)) {
+        return true;
+    }
+
+    return es_ip_local_o_privada($_SERVER['REMOTE_ADDR'] ?? '');
+}
+
+/**
+ * Obtiene el token de mantenimiento. En local permite un valor por defecto;
+ * en producción exige configurar MAIL_QUEUE_TOKEN.
+ */
+function obtener_token_mantenimiento(): string
+{
+    global $config;
+
+    $token = trim((string)getenv('MAIL_QUEUE_TOKEN'));
+    if ($token !== '') {
+        return $token;
+    }
+
+    if (is_array($config)) {
+        $tokenConfig = trim((string)($config['MAIL_QUEUE_TOKEN'] ?? ''));
+        if ($tokenConfig !== '') {
+            return $tokenConfig;
+        }
+    }
+
+    return es_peticion_local() ? 'DESARROLLO_LOCAL_2025' : '';
+}
+
+/**
+ * Valida si el token de mantenimiento sigue usando un valor inseguro.
+ */
+function token_mantenimiento_inseguro(?string $token = null): bool
+{
+    $token = trim((string)($token ?? obtener_token_mantenimiento()));
+    return $token === '' || hash_equals('DESARROLLO_LOCAL_2025', $token);
+}
+
+/**
+ * Bloquea herramientas de soporte que no deben exponerse en producción.
+ */
+function exigir_herramienta_local(string $nombreHerramienta = 'Esta herramienta'): void
+{
+    if (es_peticion_local()) {
+        return;
+    }
+
+    http_response_code(403);
+    exit($nombreHerramienta . ' solo esta disponible en localhost o en tu red privada.');
+}
+
+/**
+ * Valida el token de mantenimiento en peticiones web.
+ */
+function validar_token_mantenimiento_en_peticion(): string
+{
+    $tokenSecreto = obtener_token_mantenimiento();
+    if ($tokenSecreto === '') {
+        http_response_code(503);
+        exit('Configura MAIL_QUEUE_TOKEN antes de usar esta herramienta en produccion.');
+    }
+
+    if (!es_peticion_local() && token_mantenimiento_inseguro($tokenSecreto)) {
+        http_response_code(503);
+        exit('MAIL_QUEUE_TOKEN debe cambiarse por un valor unico antes de publicar.');
+    }
+
+    $tokenEnviado = (string)($_GET['token'] ?? $_POST['token'] ?? '');
+    if ($tokenEnviado === '' || !hash_equals($tokenSecreto, $tokenEnviado)) {
+        http_response_code(403);
+        exit('Acceso denegado.');
+    }
+
+    return $tokenSecreto;
 }
 
 /**

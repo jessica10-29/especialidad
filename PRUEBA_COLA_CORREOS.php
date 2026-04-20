@@ -10,6 +10,7 @@ header('Content-Type: text/html; charset=UTF-8');
 
 require_once 'conexion.php';
 require_once 'funciones_mail.php';
+exigir_herramienta_local('La prueba de cola de correos');
 
 $testEmail = $_POST['email'] ?? 'test@localhost.com';
 $mostrarFormulario = true;
