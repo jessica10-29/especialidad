@@ -61,7 +61,7 @@ if ($res_periodos && $res_periodos->num_rows > 0) {
         $hay_periodos = true;
     }
 } else {
-    // Fallback para mostrar mensaje en la grÃ¡fica
+    // Fallback para mostrar mensaje en la grafica
     $periodo_labels = ['Sin datos'];
     $periodo_data = [0];
     $periodo_cursos = [0];

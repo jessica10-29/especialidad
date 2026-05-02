@@ -215,18 +215,18 @@ if (!empty($folio) && strpos($folio, 'UC-') === 0) {
         <span class="value"><?php echo htmlspecialchars($folio); ?></span>
     </div>
     <div class="info-row">
-        <span class="label">IdentificaciÃ³n</span>
+        <span class="label">Identificaci&oacute;n</span>
         <span class="value"><?php echo htmlspecialchars($usuario['identificacion'] ?? 'No registrada'); ?></span>
     </div>
     <div class="info-row">
-        <span class="label">CÃ³digo Estudiantil</span>
+        <span class="label">C&oacute;digo Estudiantil</span>
         <span class="value"><?php echo htmlspecialchars($usuario['codigo_estudiantil'] ?? 'N/A'); ?></span>
     </div>
     <div class="info-row">
         <span class="label">Programa / Semestre</span>
         <span class="value">
             <?php echo htmlspecialchars($usuario['programa_academico'] ?? 'N/A'); ?>
-            <?php if (!empty($usuario['semestre'])): ?> â€¢ Sem. <?php echo htmlspecialchars($usuario['semestre']); ?><?php endif; ?>
+            <?php if (!empty($usuario['semestre'])): ?> &bull; Sem. <?php echo htmlspecialchars($usuario['semestre']); ?><?php endif; ?>
         </span>
     </div>
     <div class="info-row">
