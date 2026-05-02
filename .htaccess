@@ -7,16 +7,16 @@ RewriteRule "(^|/)\.(?!well-known(?:/|$))" - [F,L,NC]
 # Bloquear carpetas internas que nunca deben servirse públicamente
 RewriteRule "^(logs|secure|\.git|\.github|\.vscode)(?:/|$)" - [F,L,NC]
 
-# Marcar entorno local para cabeceras condicionales
-SetEnvIf Host "^(localhost|127\\.0\\.0\\.1)(:\\d+)?$" IS_LOCAL=1
+# Marcar entorno local/LAN para cabeceras condicionales
+SetEnvIfNoCase Host "^(localhost|127\\.0\\.0\\.1|::1|10\\.[0-9.]+|192\\.168\\.[0-9.]+|172\\.(1[6-9]|2[0-9]|3[01])\\.[0-9.]+)(:\\d+)?$" IS_LOCAL=1
 
 # Opcional: forzar HTTPS tambiÃ©n en localhost si hay cert instalado
 # Activa poniendo FORZAR_HTTPS=1 en Apache o descomenta la siguiente lÃ­nea
 # SetEnv FORZAR_HTTPS 1
 
-# Redirigir a HTTPS (respeta proxys tipo Cloudflare)
+# Redirigir a HTTPS solo en hosts publicos o si se fuerza por entorno
 RewriteCond %{ENV:FORZAR_HTTPS} =1 [OR]
-RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1)(:\d+)?$ [NC]
+RewriteCond %{HTTP_HOST} !^(localhost|127\.0\.0\.1|::1|10\.[0-9.]+|192\.168\.[0-9.]+|172\.(1[6-9]|2[0-9]|3[01])\.[0-9.]+)(:\d+)?$ [NC]
 RewriteCond %{HTTPS} !=on
 RewriteCond %{HTTP:X-Forwarded-Proto} !https [NC]
 RewriteRule ^ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301]

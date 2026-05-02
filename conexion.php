@@ -7,16 +7,26 @@ if (!headers_sent()) {
 }
 
 // Detectar si estamos en localhost para no forzar HTTPS en desarrollo
-$hostActual  = $_SERVER['HTTP_HOST'] ?? '';
+$hostActual  = trim((string)($_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? ''));
+$forwardedProtoRaw = trim((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+$forwardedProto = strtolower($forwardedProtoRaw);
+if (strpos($forwardedProto, ',') !== false) {
+    $forwardedProto = strtolower(trim((string)explode(',', $forwardedProto, 2)[0]));
+}
 // Considera local también redes privadas (LAN) para no forzar HTTPS cuando no hay certificado
 $isLocal     = preg_match('/^(localhost|127\\.0\\.0\\.1)(:\\d+)?$/', $hostActual) === 1
     || preg_match('/^(10\\.|192\\.168\\.|172\\.(1[6-9]|2[0-9]|3[01])\\.)/', $hostActual) === 1
     || gethostname() === 'JEFFERSON-PC';  // Fallback para hostname local
-$httpsActivo = (!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] !== 'off') ||
-    (($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? '') === 'https');
+$httpsActivo = (
+    (!empty($_SERVER['HTTPS']) && strtolower((string)$_SERVER['HTTPS']) !== 'off')
+    || $forwardedProto === 'https'
+    || strtolower((string)($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '')) === 'on'
+    || strtolower((string)($_SERVER['REQUEST_SCHEME'] ?? '')) === 'https'
+    || (string)($_SERVER['SERVER_PORT'] ?? '') === '443'
+);
 // Forzar HTTPS solo si se habilita explícitamente en la variable de entorno
 $forzarEnv = getenv('FORZAR_HTTPS');
-$forzarHttps = $forzarEnv === '1';
+$forzarHttps = $forzarEnv === '1' || ($forzarEnv !== '0' && !$isLocal);
 
 // Configuracion de errores (muestra en local, oculta en produccion)
 @ini_set('expose_php', '0');
@@ -341,6 +351,50 @@ function validar_pdf_seguro($rutaArchivo, &$error = null, $maxBytes = null)
 }
 
 /**
+ * Normaliza una URL base para uso publico.
+ * En dominios publicos fuerza https; en localhost/LAN conserva http.
+ */
+function normalizar_base_url_segura(string $url): string
+{
+    $url = trim($url);
+    if ($url === '') {
+        return '';
+    }
+
+    if (!preg_match('~^https?://~i', $url)) {
+        $url = 'https://' . ltrim($url, '/');
+    }
+
+    $partes = @parse_url($url);
+    if (!is_array($partes) || empty($partes['host'])) {
+        return rtrim($url, '/');
+    }
+
+    $host = strtolower((string)$partes['host']);
+    $scheme = strtolower((string)($partes['scheme'] ?? 'https'));
+    $path = isset($partes['path']) ? rtrim((string)$partes['path'], '/') : '';
+    $query = isset($partes['query']) ? '?' . $partes['query'] : '';
+
+    $hostEsLocal = $host === 'localhost' || $host === '::1' || es_ip_local_o_privada($host);
+    if (!$hostEsLocal) {
+        $scheme = 'https';
+    } elseif ($scheme !== 'http' && $scheme !== 'https') {
+        $scheme = 'http';
+    }
+
+    $port = '';
+    if (isset($partes['port'])) {
+        $portNumber = (string)$partes['port'];
+        $esPuertoPorDefecto = ($scheme === 'https' && $portNumber === '443') || ($scheme === 'http' && $portNumber === '80');
+        if (!$esPuertoPorDefecto) {
+            $port = ':' . $portNumber;
+        }
+    }
+
+    return "{$scheme}://{$host}{$port}{$path}{$query}";
+}
+
+/**
  * Devuelve una URL base accesible para escáneres externos (mismo WiFi),
  * priorizando APP_URL/PUBLIC_BASE_URL y evitando usar localhost en el QR.
  */
@@ -350,28 +404,45 @@ function construir_base_url()
 
     $envUrl = getenv('APP_URL') ?: getenv('PUBLIC_BASE_URL');
     if (!empty($envUrl)) {
-        return rtrim($envUrl, '/');
+        return rtrim(normalizar_base_url_segura($envUrl), '/');
     }
 
     if (is_array($config)) {
         $configUrl = trim((string)($config['APP_URL'] ?? $config['PUBLIC_BASE_URL'] ?? ''));
         if ($configUrl !== '') {
-            return rtrim($configUrl, '/');
+            return rtrim(normalizar_base_url_segura($configUrl), '/');
         }
     }
 
-    $forwardProto = $_SERVER['HTTP_X_FORWARDED_PROTO'] ?? null;
-    $protocol = $forwardProto ? (($forwardProto === 'https') ? 'https' : 'http')
-        : ((!empty($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? 'https' : 'http');
+    $forwardProto = trim((string)($_SERVER['HTTP_X_FORWARDED_PROTO'] ?? ''));
+    if (strpos($forwardProto, ',') !== false) {
+        $forwardProto = trim((string)explode(',', $forwardProto)[0]);
+    }
+    $forwardSsl = strtolower(trim((string)($_SERVER['HTTP_X_FORWARDED_SSL'] ?? '')));
+    $requestScheme = strtolower(trim((string)($_SERVER['REQUEST_SCHEME'] ?? '')));
+    $httpsFlag = strtolower(trim((string)($_SERVER['HTTPS'] ?? '')));
+    $serverPort = (string)($_SERVER['SERVER_PORT'] ?? '');
+    $protocol = (
+        $forwardProto === 'https'
+        || $forwardSsl === 'on'
+        || $requestScheme === 'https'
+        || ($httpsFlag !== '' && $httpsFlag !== 'off')
+        || $serverPort === '443'
+    ) ? 'https' : 'http';
 
-    $host = $_SERVER['HTTP_HOST'] ?? '';
+    $host = trim((string)($_SERVER['HTTP_X_FORWARDED_HOST'] ?? $_SERVER['HTTP_HOST'] ?? $_SERVER['SERVER_NAME'] ?? ''));
+    if (strpos($host, ',') !== false) {
+        $host = trim((string)explode(',', $host)[0]);
+    }
     $port = '';
 
     // Normalizar host y puerto si vienen juntos
-    if (strpos($host, ':') !== false) {
-        [$hostOnly, $portPart] = explode(':', $host, 2);
-        $host = $hostOnly;
-        $port = $portPart;
+    if (preg_match('/^\[(.+)\]:(\d+)$/', $host, $matches)) {
+        $host = $matches[1];
+        $port = $matches[2];
+    } elseif (preg_match('/^([^:]+):(\d+)$/', $host, $matches)) {
+        $host = $matches[1];
+        $port = $matches[2];
     }
 
     $candidatos = [];
@@ -396,16 +467,25 @@ function construir_base_url()
         $host = '127.0.0.1';
     }
 
+    $hostEsLocal = preg_match('/^(localhost|::1)$/i', $host) === 1 || es_ip_local_o_privada($host);
+    if ($hostEsLocal) {
+        // Evita enlaces https hacia IPs privadas/locales sin certificado valido.
+        $protocol = 'http';
+    }
+
     // Puerto si no es el estándar
     if ($port === '' && isset($_SERVER['SERVER_PORT']) && !in_array((string)$_SERVER['SERVER_PORT'], ['80', '443'])) {
         $port = $_SERVER['SERVER_PORT'];
+    }
+    if ($hostEsLocal && in_array((string)$port, ['443', '8443'], true)) {
+        $port = '';
     }
     $portPart = ($port && !in_array((string)$port, ['80', '443'])) ? ':' . $port : '';
 
     $scriptDir = str_replace('\\', '/', dirname($_SERVER['SCRIPT_NAME'] ?? ''));
     $scriptDir = ($scriptDir === '/' ? '' : $scriptDir);
 
-    return "{$protocol}://{$host}{$portPart}{$scriptDir}";
+    return normalizar_base_url_segura("{$protocol}://{$host}{$portPart}{$scriptDir}");
 }
 
 /**

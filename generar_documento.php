@@ -78,7 +78,8 @@ $qr_dir = __DIR__ . '/uploads/qr';
 if (!is_dir($qr_dir)) {
     @mkdir($qr_dir, 0755, true);
 }
-$qr_filename = $folio . '.png';
+$qr_cache_key = substr(sha1($verify_url), 0, 12);
+$qr_filename = $folio . '-' . $qr_cache_key . '.png';
 $qr_local_path = $qr_dir . '/' . $qr_filename;
 $qr_public_path = '/uploads/qr/' . $qr_filename;
 $qr_src = $qr_fallback; // fallback por defecto
