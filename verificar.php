@@ -1,5 +1,6 @@
 <?php
 // verificar.php - Validación Pública de Documentos
+define('PERMITIR_CONTINUAR_SIN_BD', true);
 require_once 'conexion.php';
 
 // No requerimos sesión iniciada ya que es una página de validación pública para terceros.
@@ -7,8 +8,9 @@ require_once 'conexion.php';
 $folio = isset($_GET['folio']) ? $_GET['folio'] : '';
 $valido = false;
 $usuario = null;
+$dbNoDisponible = !conexion_bd_disponible();
 
-if (!empty($folio) && strpos($folio, 'UC-') === 0) {
+if (!$dbNoDisponible && !empty($folio) && strpos($folio, 'UC-') === 0) {
     $id_str = substr($folio, 3);
     $id = (int)$id_str;
 
@@ -198,7 +200,13 @@ if (!empty($folio) && strpos($folio, 'UC-') === 0) {
     <div class="background-mesh"></div>
 
     <div class="verify-card">
-        <?php if ($valido): ?>
+        <?php if ($dbNoDisponible): ?>
+            <div class="status-icon icon-danger">
+                <i class="fa-solid fa-database"></i>
+            </div>
+            <h1>Validaci&oacute;n temporalmente no disponible</h1>
+            <p class="subtitle"><?php echo htmlspecialchars(obtener_mensaje_conexion_bd(), ENT_QUOTES, 'UTF-8'); ?></p>
+        <?php elseif ($valido): ?>
             <div class="status-icon icon-success">
                 <i class="fa-solid fa-check-double"></i>
             </div>

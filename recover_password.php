@@ -1,4 +1,5 @@
 ﻿<?php
+define('PERMITIR_CONTINUAR_SIN_BD', true);
 require_once 'conexion.php';
 require_once 'funciones_mail.php';
 // Asegurar UTF-8 y registrar errores sin exponer detalles en producción.
@@ -8,6 +9,7 @@ if (!headers_sent()) {
 ini_set('display_errors', $isLocal ? '1' : '0');
 error_reporting(E_ALL);
 set_time_limit(60);
+$dbNoDisponible = !conexion_bd_disponible();
 
 // Log de fatal errors por si el hosting suprime output
 $fatalLog = __DIR__ . '/logs/mail-send.log';
@@ -20,7 +22,9 @@ register_shutdown_function(function () use ($fatalLog) {
 });
 
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    if (!verificar_csrf_token($_POST['csrf_token'] ?? '')) {
+    if ($dbNoDisponible) {
+        $error_envio = obtener_mensaje_conexion_bd();
+    } elseif (!verificar_csrf_token($_POST['csrf_token'] ?? '')) {
         $error_envio = 'Solicitud invalida. Recarga la pagina e intenta de nuevo.';
     } else {
     // Log ligero para evitar pantalla en blanco si el hosting suprime errores
@@ -141,6 +145,10 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <p class="text-muted">Ingresa tu correo o n&#250;mero de identificaci&#243;n para recibir un enlace de recuperaci&#243;n.</p>
             </div>
 
+            <?php if ($dbNoDisponible && !isset($error_envio)) {
+                $error_envio = obtener_mensaje_conexion_bd();
+            } ?>
+
             <?php if (isset($_GET['ok'])): ?>
                 <div style="background: rgba(16, 185, 129, 0.1); color: #34d399; padding: 15px; border-radius: 10px; margin-bottom: 25px; font-size: 0.9rem; border: 1px solid rgba(16, 185, 129, 0.2); text-align: center;">
                     <i class="fa-solid fa-circle-check"></i> Si los datos coinciden, hemos enviado las instrucciones a tu correo personal. Revisa tu bandeja de entrada.
@@ -154,6 +162,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             <?php endif; ?>
 
             <form method="POST">
+                <fieldset style="border: 0; padding: 0; margin: 0;" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
                 <input type="hidden" name="csrf_token" value="<?php echo htmlspecialchars(generar_csrf_token(), ENT_QUOTES, 'UTF-8'); ?>">
                 <div class="input-group">
                     <label class="input-label">Correo o Identificaci&#243;n (C&#233;dula/TI)</label>
@@ -166,6 +175,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px; margin-top: 10px;">
                     Enviar Enlace <i class="fa-solid fa-paper-plane" style="margin-left: 8px;"></i>
                 </button>
+                </fieldset>
             </form>
 
             <div class="security-badge" style="margin-top: 30px;">

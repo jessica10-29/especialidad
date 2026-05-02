@@ -16,40 +16,35 @@ El sistema detecta automáticamente que estás en local y usa:
 
 ## 🌐 EN HOSTING REMOTO (InfinityFree, Hostinger, etc.)
 
-### Opción 1: Usar las mismas credenciales locales (RECOMENDADO - Más simple)
-Si tu hosting está alojando también la BD `universidad`:
+En un hosting compartido debes configurar las credenciales reales del panel. El fallback a `localhost`/`root` solo sirve en tu equipo local.
 
-1. No modificar nada en `secure/config.php`
-2. El sistema automáticamente detecta que NO eres local
-3. Intenta conectar con credenciales remotas
-4. Si están vacías (como ahora), **automáticamente fallback a locales**
-
-✅ **Ventaja:** Funciona igual en local que en hosting sin cambios
-
----
-
-### Opción 2: Usar credenciales remota personalizadas
-Si tienes otra base de datos en hosting:
+### Credenciales remotas obligatorias
 
 1. Abre `secure/config.php`
-2. Completa las credenciales remotas:
+2. Completa las credenciales remotas con los datos del panel:
 
 ```php
-'DB_HOST' => getenv('DB_HOST') ?: 'db.mihosting.com',
-'DB_USER' => getenv('DB_USER') ?: 'usuario_remoto',
-'DB_PASS' => getenv('DB_PASS') ?: 'contraseña_remota',
-'DB_NAME' => getenv('DB_NAME') ?: 'base_datos_remota',
+'DB_HOST' => getenv('DB_HOST') ?: 'sql123.epizy.com',
+'DB_USER' => getenv('DB_USER') ?: 'if0_12345678',
+'DB_PASS' => getenv('DB_PASS') ?: 'tu_password_del_hosting',
+'DB_NAME' => getenv('DB_NAME') ?: 'if0_12345678_universidad',
 ```
+
+Notas para InfinityFree:
+- No uses `localhost` como host de MySQL.
+- El host suele verse como `sql123.epizy.com` o `sql123.infinityfree.com`.
+- Si tu panel muestra un alias distinto, usa exactamente el que te entrega el hosting.
 
 ---
 
 ## 🔍 Verificar Conexión
 
 Abre en el navegador:
-```
+``` 
 http://localhost/especialidad/test_login.php  (Local)
-http://midominio.com/especialidad/test_login.php  (Hosting)
 ```
+
+En producción `test_login.php` puede estar bloqueado por seguridad. En ese caso revisa `logs/php-error.log` o habilita temporalmente un entorno de prueba.
 
 Te mostrará:
 - ✅ Entorno (Local o Remoto)
@@ -68,7 +63,7 @@ Te mostrará:
 - [ ] Acceder a `http://localhost/especialidad/login.php`
 
 ### Hosting
-- [ ] Credenciales remotas en `secure/config.php` (O dejar vacías para fallback)
+- [ ] Credenciales remotas correctas en `secure/config.php` o en secretos del deploy
 - [ ] Base de datos creada en hosting
 - [ ] SSL/HTTPS configurado (opcional pero recomendado)
 - [ ] Acceder a `https://midominio.com/especialidad/login.php`

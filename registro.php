@@ -1,15 +1,22 @@
 <?php
+define('PERMITIR_CONTINUAR_SIN_BD', true);
 require_once 'conexion.php';
 
 $mensaje = '';
+$dbNoDisponible = !conexion_bd_disponible();
 
 // Self-healing: agregar columna para codigo docente si falta
-$col_prof = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'codigo_profesor'");
-if ($col_prof && $col_prof->num_rows === 0) {
-    $conn->query("ALTER TABLE usuarios ADD COLUMN codigo_profesor VARCHAR(50) DEFAULT NULL AFTER codigo_estudiantil");
+if (!$dbNoDisponible) {
+    $col_prof = $conn->query("SHOW COLUMNS FROM usuarios LIKE 'codigo_profesor'");
+    if ($col_prof && $col_prof->num_rows === 0) {
+        $conn->query("ALTER TABLE usuarios ADD COLUMN codigo_profesor VARCHAR(50) DEFAULT NULL AFTER codigo_estudiantil");
+    }
 }
 
 if ($_SERVER["REQUEST_METHOD"] == "POST") {
+    if ($dbNoDisponible) {
+        $mensaje = obtener_alerta_conexion_html(obtener_mensaje_conexion_bd());
+    } else {
     $nombre = limpiar_dato($_POST['nombre'] ?? '');
     $email = limpiar_dato($_POST['email'] ?? '');
     $identificacion = limpiar_dato($_POST['identificacion'] ?? '');
@@ -102,6 +109,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
             $stmt->close();
         }
         $stmt_check->close();
+    }
     }
 }
 ?>
@@ -442,9 +450,15 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                         generara automaticamente al guardar.</p>
                 </div>
 
-                <?php echo $mensaje; ?>
+                <?php
+                if ($dbNoDisponible && $mensaje === '') {
+                    $mensaje = obtener_alerta_conexion_html(obtener_mensaje_conexion_bd());
+                }
+                echo $mensaje;
+                ?>
 
                 <form method="POST" action="" enctype="multipart/form-data" autocomplete="off">
+                    <fieldset style="border: 0; padding: 0; margin: 0;" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
                     <div class="two-col">
                         <div class="input-group">
                             <label class="input-label">Nombre Completo</label>
@@ -563,6 +577,7 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                     <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px; margin-top: 8px;">
                         Crear Cuenta <i class="fa-solid fa-user-check" style="margin-left: 8px;"></i>
                     </button>
+                    </fieldset>
                 </form>
 
                 <div style="margin: 20px 0; border-top: 1px solid var(--glass-border);"></div>

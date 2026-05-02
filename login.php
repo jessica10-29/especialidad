@@ -1,8 +1,10 @@
 <?php
+define('PERMITIR_CONTINUAR_SIN_BD', true);
 // session_start(); // Eliminado: conexion.php maneja el inicio de sesión seguro
 require_once 'conexion.php';
 
 $error = '';
+$dbNoDisponible = !conexion_bd_disponible();
 // Mostrar campo de código docente solo cuando aplica (rol profesor).
 $rolSeleccionado = strtolower(trim((string)($_POST['rol_seleccionado'] ?? $_GET['rol'] ?? 'estudiante')));
 if (!in_array($rolSeleccionado, ['estudiante', 'profesor'], true)) {
@@ -38,6 +40,9 @@ if (!headers_sent()) {
 }
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if ($dbNoDisponible) {
+        $error = obtener_mensaje_conexion_bd();
+    } else {
 
     // 🛡️ Verificar CSRF
     if (!isset($_POST['csrf_token']) || !verificar_csrf_token($_POST['csrf_token'])) {
@@ -113,6 +118,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             $error = "Error en la consulta a la base de datos. Intenta más tarde.";
         }
     }
+    }
 }
 ?>
 
@@ -146,6 +152,10 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                 <p class="text-muted">Ingresa tus credenciales para continuar</p>
             </div>
 
+            <?php if ($dbNoDisponible && !$error) {
+                $error = obtener_mensaje_conexion_bd();
+            } ?>
+
             <?php if ($error): ?>
                 <div
                     style="background: rgba(244, 63, 94, 0.1); color: #fb7185; padding: 12px; border-radius: 10px; margin-bottom: 25px; font-size: 0.85rem; border: 1px solid rgba(244, 63, 114, 0.2);">
@@ -161,15 +171,15 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
 
                 <div class="input-group">
                     <label class="input-label">Usuario (Correo o Cédula)</label>
-                    <input type="text" name="identificador" class="input-field" placeholder="ej: juan@email.com o 1005..." required autocomplete="username">
+                    <input type="text" name="identificador" class="input-field" placeholder="ej: juan@email.com o 1005..." required autocomplete="username" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
                 </div>
 
                 <div class="input-group">
                     <label class="input-label">Contraseña</label>
                     <div class="input-wrapper">
                         <input type="password" name="password" id="password" class="input-field" placeholder="••••••••"
-                            required autocomplete="current-password">
-                        <button type="button" class="password-toggle" data-target="password">
+                            required autocomplete="current-password" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
+                        <button type="button" class="password-toggle" data-target="password" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
                             <i class="fa-solid fa-eye"></i>
                         </button>
                     </div>
@@ -183,7 +193,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                             Código de Acceso Docente (solo profesores)
                         </label>
                         <input type="password" name="codigo_docente" class="input-field"
-                            placeholder="Ingrese solo si es profesor" autocomplete="off">
+                            placeholder="Ingrese solo si es profesor" autocomplete="off" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
                     </div>
                 <?php endif; ?>
 
@@ -195,7 +205,7 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
                         tu contraseña?</a>
                 </div>
 
-                <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px;">
+                <button type="submit" class="btn btn-primary" style="width: 100%; height: 50px;" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
                     Entrar Seguramente <i class="fa-solid fa-lock" style="margin-left: 8px;"></i>
                 </button>
             </form>

@@ -1,4 +1,5 @@
 <?php
+define('PERMITIR_CONTINUAR_SIN_BD', true);
 require_once 'conexion.php';
 
 if (!isset($_GET['token'])) {
@@ -7,7 +8,13 @@ if (!isset($_GET['token'])) {
 }
 
 $token = $_GET['token'];
+$dbNoDisponible = !conexion_bd_disponible();
+$usuario = null;
 
+$error = '';
+if ($dbNoDisponible) {
+    $error = obtener_mensaje_conexion_bd();
+} else {
 $sql = $conn->prepare(
     "SELECT u.id, u.email 
      FROM password_resets pr
@@ -28,8 +35,12 @@ if ($res->num_rows === 0) {
 }
 
 $usuario = $res->fetch_assoc();
+}
 
 if ($_SERVER["REQUEST_METHOD"] === "POST") {
+    if ($dbNoDisponible) {
+        $error = obtener_mensaje_conexion_bd();
+    } else {
     $pass_raw = $_POST['password'];
     $confirm = $_POST['confirm_password'];
 
@@ -58,8 +69,8 @@ if ($_SERVER["REQUEST_METHOD"] === "POST") {
             }
         }
     }
+    }
 }
-$error = isset($error) ? $error : '';
 ?>
 
 <!DOCTYPE html>
@@ -94,6 +105,7 @@ $error = isset($error) ? $error : '';
             <?php endif; ?>
 
             <form method="POST">
+                <fieldset style="border: 0; padding: 0; margin: 0;" <?php echo $dbNoDisponible ? 'disabled' : ''; ?>>
 
                 <!-- NUEVA CONTRASEÑA -->
                 <div class="input-group">
@@ -152,6 +164,7 @@ $error = isset($error) ? $error : '';
                         style="width:100%; height:50px; margin-top:10px; background:#10b981;">
                         Actualizar Contraseña <i class="fa-solid fa-shield-check" style="margin-left:8px;"></i>
                     </button>
+                </fieldset>
             </form>
 
         </div>

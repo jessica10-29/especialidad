@@ -77,12 +77,99 @@ if (!headers_sent()) {
     ]);
 }
 
+function renderizar_pantalla_servicio_no_disponible($mensaje, $esLocal = false, $detalleTecnico = '')
+{
+    http_response_code(503);
+    echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">';
+    echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
+    echo '<title>Servicio temporalmente no disponible</title>';
+    echo '<link rel="stylesheet" href="css/estilos.css">';
+    echo '<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" integrity="sha512-iecdLmaskl7CVkqkXNQ/ZH/XLlvWZOJyj7Yy7tcenmpD1ypASozpmT/E0iPtmFIB46ZmdtAc9eNBvH0H/ZpiBw==" crossorigin="anonymous" referrerpolicy="no-referrer">';
+    echo '<style>.status-card{max-width:560px}.status-icon{width:84px;height:84px;margin:0 auto 20px;border-radius:50%;display:flex;align-items:center;justify-content:center;font-size:2rem;background:rgba(245,158,11,.14);color:#fbbf24;border:1px solid rgba(245,158,11,.2)}.status-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}.status-card p{color:var(--text-muted)}.status-hint{margin-top:14px;padding:12px 14px;border-radius:12px;background:rgba(255,255,255,.04);border:1px solid rgba(255,255,255,.08);font-size:.85rem;line-height:1.55;color:#cbd5e1}</style>';
+    echo '</head><body><div class="background-mesh"></div><div class="login-container"><div class="glass-panel login-box fade-in status-card">';
+    echo '<div class="status-icon"><i class="fa-solid fa-database"></i></div>';
+    echo '<h1 style="font-size:2rem; margin-bottom:12px;">Servicio temporalmente no disponible</h1>';
+    echo '<p>' . htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') . '</p>';
+    if ($esLocal && $detalleTecnico !== '') {
+        echo '<div class="status-hint"><strong>Detalle local:</strong> ' . htmlspecialchars($detalleTecnico, ENT_QUOTES, 'UTF-8') . '</div>';
+    }
+    echo '<div class="status-actions">';
+    echo '<a href="index.php" class="btn btn-outline"><i class="fa-solid fa-house"></i> Inicio</a>';
+    echo '<a href="login.php" class="btn btn-primary"><i class="fa-solid fa-rotate-right"></i> Reintentar</a>';
+    echo '</div>';
+    echo '<div class="security-badge" style="margin-top:28px;"><i class="fa-solid fa-shield-halved"></i><span>Unicali Segura</span></div>';
+    echo '</div></div></body></html>';
+}
+
+function obtener_alerta_conexion_html($mensaje)
+{
+    return '<div style="background: rgba(245, 158, 11, 0.12); color: #fcd34d; padding: 14px 16px; border-radius: 12px; margin-bottom: 25px; font-size: 0.9rem; border: 1px solid rgba(245, 158, 11, 0.22); text-align: center;">'
+        . '<i class="fa-solid fa-triangle-exclamation" style="margin-right: 8px;"></i>'
+        . htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8')
+        . '</div>';
+}
+
+function normalizar_configuracion_bd($host, $port)
+{
+    $host = trim((string)$host);
+    $port = trim((string)$port);
+
+    if ($host !== '' && stripos($host, 'mysql://') === 0) {
+        $partes = parse_url($host);
+        if ($partes !== false) {
+            $host = trim((string)($partes['host'] ?? $host));
+            if (!empty($partes['port'])) {
+                $port = (string)$partes['port'];
+            }
+        }
+    }
+
+    if ($host !== '' && strpos($host, ':') !== false && preg_match('/^[^:]+:\d+$/', $host) === 1) {
+        [$hostExtraido, $portExtraido] = explode(':', $host, 2);
+        $host = trim($hostExtraido);
+        if ($port === '') {
+            $port = trim($portExtraido);
+        }
+    }
+
+    if (preg_match('/^\d+$/', $host) === 1 && preg_match('/^[A-Za-z0-9._-]+$/', $port) === 1 && preg_match('/^\d+$/', $port) !== 1) {
+        [$host, $port] = [$port, $host];
+    } elseif ($host === '' && preg_match('/^[A-Za-z0-9._-]+$/', $port) === 1 && preg_match('/^\d+$/', $port) !== 1) {
+        $host = $port;
+        $port = '3306';
+    }
+
+    $portNormalizado = intval($port);
+    if ($portNormalizado <= 0 || $portNormalizado > 65535) {
+        $portNormalizado = 3306;
+    }
+
+    return [
+        'host' => $host,
+        'port' => $portNormalizado,
+    ];
+}
+
 // Cargar credenciales externas
 $configPath = __DIR__ . '/secure/config.php';
+$permiteContinuarSinBd = defined('PERMITIR_CONTINUAR_SIN_BD') && PERMITIR_CONTINUAR_SIN_BD;
+$dbDisponible = false;
+$dbErrorPublico = '';
+$dbErrorTecnico = '';
+$dbHostUtilizado = '';
+
 if (!file_exists($configPath)) {
-    exit('Falta el archivo secure/config.php con las credenciales de la base de datos.');
+    $dbErrorPublico = 'Falta la configuración de base de datos del sitio.';
+    $dbErrorTecnico = 'No existe el archivo secure/config.php.';
+    if ($permiteContinuarSinBd) {
+        $config = [];
+    } else {
+        renderizar_pantalla_servicio_no_disponible($dbErrorPublico, $isLocal, $dbErrorTecnico);
+        exit;
+    }
+} else {
+    $config = require $configPath;
 }
-$config = require $configPath;
 
 // Seleccionar credenciales segun entorno (local vs hosting)
 // Por defecto usa la base local; para forzar la remota define FORZAR_LOCAL_DB=0
@@ -90,13 +177,13 @@ $usarLocal = ($isLocal || getenv('FORZAR_LOCAL_DB') === '1') && getenv('FORZAR_L
 
 if ($usarLocal) {
     $host = $config['DB_HOST_LOCAL'] ?? 'localhost';
-    $port = intval($config['DB_PORT_LOCAL'] ?? 3306);
+    $port = $config['DB_PORT_LOCAL'] ?? 3306;
     $user = $config['DB_USER_LOCAL'] ?? 'root';
     $pass = $config['DB_PASS_LOCAL'] ?? '';
     $db   = $config['DB_NAME_LOCAL'] ?? 'universidad';
 } else {
     $host = $config['DB_HOST'] ?? '';
-    $port = intval($config['DB_PORT'] ?? 3306);
+    $port = $config['DB_PORT'] ?? 3306;
     $user = $config['DB_USER'] ?? '';
     $pass = $config['DB_PASS'] ?? '';
     $db   = $config['DB_NAME'] ?? '';
@@ -104,44 +191,91 @@ if ($usarLocal) {
     // FALLBACK: Si credenciales remotas están vacías, usa las locales
     if (empty($host) || empty($user) || empty($db)) {
         $host = $config['DB_HOST_LOCAL'] ?? 'localhost';
-        $port = intval($config['DB_PORT_LOCAL'] ?? 3306);
+        $port = $config['DB_PORT_LOCAL'] ?? 3306;
         $user = $config['DB_USER_LOCAL'] ?? 'root';
         $pass = $config['DB_PASS_LOCAL'] ?? '';
         $db   = $config['DB_NAME_LOCAL'] ?? 'universidad';
     }
 }
 
-// Evitar excepciones fatales de mysqli y manejar manualmente
-mysqli_report(MYSQLI_REPORT_OFF);
-$conn = @new mysqli($host, $user, $pass, $db, $port);
+$configBdNormalizada = normalizar_configuracion_bd($host, $port);
+$host = $configBdNormalizada['host'];
+$port = $configBdNormalizada['port'];
 
-if ($conn->connect_errno) {
-    error_log("Error de conexion a BD ({$host}): " . $conn->connect_error);
-    http_response_code(503);
-    // Respuesta limpia y sin "pantallazo rojo"
-    $mensaje = $isLocal
-        ? 'No se pudo conectar a la base de datos local. Verifica MySQL, usuario, contrase&ntilde;a y nombre de BD.'
-        : 'Estamos realizando ajustes t&eacute;cnicos. Intenta nuevamente en unos minutos.';
-
-    echo '<!DOCTYPE html><html lang="es"><head><meta charset="UTF-8">';
-    echo '<meta name="viewport" content="width=device-width, initial-scale=1.0">';
-    echo '<title>Servicio temporalmente no disponible</title>';
-    echo '<style>body{font-family:Arial,sans-serif; background:#0f172a; color:#e2e8f0; display:flex; align-items:center; justify-content:center; height:100vh; margin:0;}';
-    echo '.card{background:#111827; padding:28px 32px; border-radius:14px; box-shadow:0 18px 50px rgba(0,0,0,.35); max-width:420px; text-align:center;}';
-    echo '.card h1{font-size:1.25rem; margin-bottom:10px;} .card p{margin:8px 0 0; color:#cbd5e1; line-height:1.5;}';
-    echo '.card small{display:block; margin-top:12px; color:#94a3b8;}</style></head><body>';
-    echo '<div class="card">';
-    echo '<h1>Servicio temporalmente no disponible</h1>';
-    echo '<p>' . htmlspecialchars($mensaje, ENT_QUOTES, 'UTF-8') . '</p>';
-    if ($isLocal) {
-        echo '<small>Hint: Arranca MySQL en XAMPP y confirma los datos en secure/config.php o variables DB_*_LOCAL.';
-        echo ' Error de conexión: ' . htmlspecialchars($conn->connect_error, ENT_QUOTES, 'UTF-8') . '</small>';
+function obtener_hosts_bd_candidatos($host)
+{
+    $host = trim((string)$host);
+    if ($host === '') {
+        return [''];
     }
-    echo '</div></body></html>';
-    exit;
+
+    $candidatos = [$host];
+    if (preg_match('/^(sql\d+)\.(infinityfree\.com|epizy\.com|byetcluster\.com)$/i', $host, $coincidencias)) {
+        $prefijo = strtolower($coincidencias[1]);
+        $dominioActual = strtolower($coincidencias[2]);
+        $dominiosAlternativos = ['epizy.com', 'infinityfree.com', 'byetcluster.com'];
+
+        foreach ($dominiosAlternativos as $dominio) {
+            if ($dominio === $dominioActual) {
+                continue;
+            }
+            $candidatos[] = $prefijo . '.' . $dominio;
+        }
+    }
+
+    return array_values(array_unique($candidatos));
 }
 
-$conn->set_charset('utf8mb4');
+// Evitar excepciones fatales de mysqli y manejar manualmente
+mysqli_report(MYSQLI_REPORT_OFF);
+$hostsIntentados = obtener_hosts_bd_candidatos($host);
+$erroresConexion = [];
+$conn = null;
+
+if (!$usarLocal && preg_match('/^\d+$/', trim((string)$host)) === 1) {
+    error_log("Configuracion sospechosa de BD: DB_HOST parece un puerto ({$host}). Revisa tus credenciales remotas.");
+}
+
+foreach ($hostsIntentados as $hostCandidato) {
+    $mysqli = mysqli_init();
+    if ($mysqli === false) {
+        $erroresConexion[] = $hostCandidato . ' => No se pudo inicializar mysqli.';
+        continue;
+    }
+
+    // Evita que el login quede colgado demasiado tiempo si el host remoto no responde.
+    mysqli_options($mysqli, MYSQLI_OPT_CONNECT_TIMEOUT, 8);
+    $conexionOk = @$mysqli->real_connect($hostCandidato, $user, $pass, $db, $port);
+
+    if ($conexionOk) {
+        $conn = $mysqli;
+        $host = $hostCandidato;
+        $dbHostUtilizado = $hostCandidato;
+        $dbDisponible = true;
+        break;
+    }
+
+    $erroresConexion[] = $hostCandidato . ' => ' . ($mysqli->connect_error ?: 'Sin detalles del controlador MySQL.');
+    $mysqli->close();
+}
+
+if (!($conn instanceof mysqli)) {
+    $detalleError = implode(' | ', $erroresConexion);
+    error_log("Error de conexion a BD. Hosts intentados: " . implode(', ', $hostsIntentados) . ". Detalle: " . $detalleError);
+    $dbErrorPublico = $isLocal
+        ? 'No se pudo conectar a la base de datos local. Verifica MySQL, usuario, contraseña y nombre de BD.'
+        : 'No pudimos conectar el portal con la base de datos en este momento. Intenta nuevamente en unos minutos.';
+    $dbErrorTecnico = $erroresConexion ? end($erroresConexion) : 'Sin detalles del controlador MySQL.';
+
+    if (!$permiteContinuarSinBd) {
+        renderizar_pantalla_servicio_no_disponible($dbErrorPublico, $isLocal, (string)$dbErrorTecnico);
+        exit;
+    }
+}
+
+if ($dbDisponible) {
+    $conn->set_charset('utf8mb4');
+}
 
 // Iniciar sesion solo si no esta iniciada
 if (session_status() === PHP_SESSION_NONE) {
@@ -188,6 +322,9 @@ function limpiar_dato($dato)
         return '';
     }
     $valor = trim((string)$dato);
+    if (!($conn instanceof mysqli)) {
+        return $valor;
+    }
     return $conn->real_escape_string($valor);
 }
 
@@ -202,6 +339,18 @@ function obtener_foto_usuario($foto = null)
         return 'uploads/fotos/' . $foto;
     }
     return 'https://ui-avatars.com/api/?name=User&background=6366f1&color=fff';
+}
+
+function conexion_bd_disponible()
+{
+    global $dbDisponible;
+    return $dbDisponible === true;
+}
+
+function obtener_mensaje_conexion_bd()
+{
+    global $dbErrorPublico;
+    return $dbErrorPublico;
 }
 
 // === CSRF ===
